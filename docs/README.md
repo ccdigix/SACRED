@@ -33,7 +33,7 @@ Install-Module SACRED
 To install the SACRED PowerShell modules directly from the source code first clone a version of the SACRED repo by executing...
 
 ```bash
-git clone ???
+git clone https://github.com/ccdigix/SACRED.git
 ```
 
 ...and then from within the `src` directory of the repo run the `LocalSACREDBuildAndDeploy.ps1` script.
