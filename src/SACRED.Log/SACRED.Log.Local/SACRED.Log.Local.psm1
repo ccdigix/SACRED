@@ -1,3 +1,4 @@
+<#
 Copyright (c) 2023 Chris Clohosy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,3 +18,47 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+#>
+
+using module SACRED.Log
+
+Class SACREDLocalLogger : SACREDLogger
+{
+    [string] $logFilePath
+
+    SACREDLocalLogger([string] $basePath)
+    {
+        $logFileName = "$([Math]::Round((Get-Date).ToFileTime()/10000)).txt"
+        $this.logFilePath = Join-Path -Path $basePath -ChildPath $logFileName
+    }
+
+    [void] Log([string] $message, [SACREDLogLevel] $logLevel)
+    {
+        $logMessage = "$([DateTime]::Now.ToString('yyyy-MM-dd HH:mm:ss')) $logLevel $message"
+        Add-Content -Path $this.logFilePath -Value "$logMessage"
+
+        switch($logLevel)
+        {
+            'Debug'
+            {
+                Write-Debug $logMessage
+            }
+            'Info'
+            {
+                Write-Host $logMessage
+            }
+            'Warning'
+            {
+                Write-Warning $logMessage
+            }
+            'Error'
+            {
+                Write-Error $logMessage
+            }
+            'Fatal'
+            {
+                Write-Error $logMessage
+            }
+        }
+    }
+}

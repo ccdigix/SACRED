@@ -1,3 +1,4 @@
+<#
 Copyright (c) 2023 Chris Clohosy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,3 +18,45 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+#>
+
+Enum SACREDLogLevel
+{
+    Debug
+    Info
+    Warning
+    Error
+    Fatal
+}
+
+Class SACREDLogger
+{
+    [void] Log([string] $message, [SACREDLogLevel] $logLevel)
+    {
+    }
+
+    [void] Debug([string] $message)
+    {
+        $this.Log($message, [SACREDLogLevel]::Debug)
+    }
+
+    [void] Info([string] $message)
+    {
+        $this.Log($message, [SACREDLogLevel]::Info)
+    }
+
+    [void] Warning([string] $message)
+    {
+        $this.Log($message, [SACREDLogLevel]::Warning)
+    }
+
+    [void] Error([string] $message)
+    {
+        $this.Log($message, [SACREDLogLevel]::Error)
+    }   
+
+    [void] Fatal([string] $message)
+    {
+        $this.Log($message, [SACREDLogLevel]::Fatal)
+    }
+}
