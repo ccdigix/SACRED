@@ -1,7 +1,7 @@
 <div align="center">
     <p>
         <a align="center" href="" target="_blank">
-            <img width="20%" src="SACRED.png">
+            <img width="33%" src="SACRED.png">
         </a>
     </p>
 
