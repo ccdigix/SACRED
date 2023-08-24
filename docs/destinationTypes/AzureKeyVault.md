@@ -4,8 +4,9 @@
             <img width="20%" src="../SACRED.png">
         </a>
     </p>
-![version](https://img.shields.io/powershellgallery/v/SACRED.Update.Azure.KeyVault)
-![license](https://img.shields.io/github/license/ccdigix/SACRED)
+
+[![version](https://img.shields.io/powershellgallery/v/SACRED.Update.Azure.KeyVault)](https://www.powershellgallery.com/packages/SACRED.Update.Azure.KeyVault)
+[![license](https://img.shields.io/github/license/ccdigix/SACRED)](https://opensource.org/license/mit/)
 </div>
 
 ## Azure Key Vault

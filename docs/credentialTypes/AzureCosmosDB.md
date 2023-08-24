@@ -4,8 +4,9 @@
             <img width="20%" src="../SACRED.png">
         </a>
     </p>
-![version](https://img.shields.io/powershellgallery/v/SACRED.Rotate.Azure.CosmosDB)
-![license](https://img.shields.io/github/license/ccdigix/SACRED)
+
+[![version](https://img.shields.io/powershellgallery/v/SACRED.Rotate.Azure.CosmosDB)](https://www.powershellgallery.com/packages/SACRED.Rotate.Azure.CosmosDB)
+[![license](https://img.shields.io/github/license/ccdigix/SACRED)](https://opensource.org/license/mit/)
 </div>
 
 ## Azure Cosmos DB
