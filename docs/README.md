@@ -185,4 +185,4 @@ More information about configuring the Windows task scheduler can be found [here
 
 ## 🤗 Contributing
 
-Everyone is welcome to contribute and improve SACRED, in fact we actively encourage it. Please read our [contribution guidelines](CONTRIBUTING.md) to find out how best to modify the codebase. We look forward to receiving your pull request!
+Everyone is welcome to contribute to and improve SACRED, in fact we actively encourage it. Please read our [contribution guidelines](CONTRIBUTING.md) to find out how best to modify the codebase and help us with the current wishlist of [enhancements](https://github.com/ccdigix/SACRED/labels/enhancement). We look forward to receiving your pull request!
