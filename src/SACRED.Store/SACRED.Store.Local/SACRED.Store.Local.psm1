@@ -33,7 +33,15 @@ Class SACREDLocalStore : SACREDStore
     {
         $this.basePath = $basePath
         $this.credentialVersionDetailsBasePath = Join-Path -Path $this.basePath -ChildPath "credentialVersions"
+        if (!(Test-Path -Path $this.credentialVersionDetailsBasePath))
+        {
+            [system.io.directory]::CreateDirectory($this.credentialVersionDetailsBasePath)
+        }
         $this.rotationJobDefinitionsBasePath = Join-Path -Path $this.basePath -ChildPath "rotationJobDefinitions"
+        if (!(Test-Path -Path $this.rotationJobDefinitionsBasePath))
+        {
+            [system.io.directory]::CreateDirectory($this.rotationJobDefinitionsBasePath)
+        }
     }
 
     [SACREDCredentialVersionDetails] GetSACREDRotationJobCredentialVersionDetails([string] $rotationJobName)
