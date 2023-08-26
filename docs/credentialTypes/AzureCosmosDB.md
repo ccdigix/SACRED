@@ -53,5 +53,5 @@ When a rotation job occurs it produces a map containing useful information that 
 
 | Key Name | Description |
 | ------------- | ------------- |
-| Key | The newly generated Cosmos DB account key. |
-| ConnectionString | The connection string for the Cosmos DB account, containing the newly generated account key. |
+| CosmosDBAccountKey | The newly generated Cosmos DB account key. |
+| CosmosDBConnectionString | The connection string for the Cosmos DB account, containing the newly generated account key. |

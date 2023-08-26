@@ -135,7 +135,7 @@ Function Invoke-SACREDCosmosDBKeyRegeneration (
     $accountKeyConnectionStrings = Get-AzCosmosDBAccountKey -ResourceGroupName $AccountResourceGroupName -Name $AccountName -Type 'ConnectionStrings' -DefaultProfile $resourceContext
     $newAccountKeyConnectionString = ($accountKeyConnectionStrings.GetEnumerator() | Where-Object { $_.Value -like "*$newAccountKey*" }).Value
 
-    $newCredentials = @{'Key'=$newAccountKey; 'ConnectionString'=$newAccountKeyConnectionString}
+    $newCredentials = @{'CosmosDBAccountKey'=$newAccountKey; 'CosmosDBConnectionString'=$newAccountKeyConnectionString}
     return $newCredentials
 }
 

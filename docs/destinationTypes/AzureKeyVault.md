@@ -24,10 +24,10 @@ The following JSON job definition snippet updates one or more secrets within an 
     "update": {
         "keyVaults": [
             {
-                "keyVaultName":  "NAME OF THE KEY VAULT",
+                "keyVaultName": "NAME OF THE KEY VAULT",
                 "secretMappings":  {
-                    "KEY NAME OF THE ROTATION OUTPUT TO STORE":  "NAME OF THE KEY VAULT SECRET TO STORE THE INFO IN",
-                    "ANOTHER KEY NAME OF THE ROTATION OUTPUT TO STORE":  "NAME OF ANOTHER KEY VAULT SECRET TO STORE THE INFO IN",
+                    "NAME OF THE KEY VAULT SECRET TO STORE THE INFO IN": "KEY NAME OF THE ROTATION OUTPUT TO STORE",
+                    "NAME OF ANOTHER KEY VAULT SECRET TO STORE THE INFO IN": "ANOTHER KEY NAME OF THE ROTATION OUTPUT TO STORE",
                     ...
                 }
             }
@@ -47,10 +47,10 @@ The following JSON job definition snippet updates one or more certificates withi
     "update": {
         "keyVaults": [
             {
-                "keyVaultName":  "NAME OF THE KEY VAULT",
+                "keyVaultName": "NAME OF THE KEY VAULT",
                 "certificateMappings":  {
-                    "KEY NAME OF A CERTIFICATE WITHIN THE ROTATION OUTPUT THAT WE WANT TO STORE":  "NAME OF THE KEY VAULT CERTIFICATE TO STORE IT IN",
-                    "ANOTHER KEY NAME OF A CERTIFICATE WITHIN THE ROTATION OUTPUT THAT WE WANT TO STORE":  "NAME OF ANOTHER KEY VAULT CERTIFICATE TO STORE IT IN",
+                    "NAME OF THE KEY VAULT CERTIFICATE TO STORE IT IN": "KEY NAME OF A CERTIFICATE WITHIN THE ROTATION OUTPUT THAT WE WANT TO STORE",
+                    "NAME OF ANOTHER KEY VAULT CERTIFICATE TO STORE IT IN": "ANOTHER KEY NAME OF A CERTIFICATE WITHIN THE ROTATION OUTPUT THAT WE WANT TO STORE",
                     ...
                 }
             }

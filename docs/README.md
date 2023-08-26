@@ -110,10 +110,10 @@ For example the definition JSON to rotate an Azure Cosmos DB account key on a we
     "update": {
         "keyVaults": [
             {
-                "keyVaultName":  "mykeyvault",
+                "keyVaultName": "mykeyvault",
                 "secretMappings":  {
-                    "Key":  "secretnametoholdkey",
-                    "ConnectionString":  "secretnametoholdconnectionstring"
+                    "secretnametoholdkey": "CosmosDBAccountKey",
+                    "secretnametoholdconnectionstring": "CosmosDBConnectionString"
                 }
             }
         ]
@@ -121,7 +121,7 @@ For example the definition JSON to rotate an Azure Cosmos DB account key on a we
 }
 ```
 
-The above example shows a subtle feature of a SACRED rotation job - that a rotation may not just generate a new credential but also additional information that may be of use (such as the Cosmos DB's new connection string). The destinations to be updated then pick out the items that they want to use (such as the Key Vault storing both the 'Key' and 'ConnectionString' in secrets). A full list of [credential](credentialTypes/Index.md) and [destination](destinationTypes/Index.md) types are maintained.
+The above example shows a subtle feature of a SACRED rotation job - that a rotation may not just generate a new credential but also additional information that may be of use (such as the Cosmos DB's new connection string). The destinations to be updated then pick out the items that they want to use (such as the Key Vault storing both the 'CosmosDBAccountKey' and 'CosmosDBConnectionString' in secrets). A full list of [credential](credentialTypes/Index.md) and [destination](destinationTypes/Index.md) types are maintained.
 
 To register a rotation job with SACRED a string containing the JSON definition must be sent to the `Register-SACREDRotationJobDefinition` function alongside an optional name for the job:
 

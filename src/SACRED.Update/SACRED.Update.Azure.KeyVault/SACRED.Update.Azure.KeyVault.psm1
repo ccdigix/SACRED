@@ -58,8 +58,8 @@ Function Publish-SACREDAzureKeyVaultSecrets (
 
     $global:SACREDLogger.Info("Publishing secrets to Azure Key Vault $KeyVaultName.")
     $SecretMappings.PSObject.Properties | ForEach-Object {
-        $secretName = $_.Value
-        $secretValue = $SecretValues[$_.Name]
+        $secretName = $_.Name
+        $secretValue = $SecretValues[$_.Value]
         $secureSecretValue = ConvertTo-SecureString -String $secretValue -AsPlainText -Force
         Publish-SACREDAzureKeyVaultSecret -KeyVaultName $KeyVaultName -SecretName $secretName -SecretValue $secureSecretValue
     }
@@ -149,8 +149,8 @@ Function Publish-SACREDAzureKeyVaultCertificates (
 
     $global:SACREDLogger.Info("Publishing certificates to Azure Key Vault $KeyVaultName.")
     $CertificateMappings.PSObject.Properties | ForEach-Object {
-        $certificateName = $_.Value
-        $certificateString = $CertificateValues[$_.Name]
+        $certificateName = $_.Name
+        $certificateString = $CertificateValues[$_.Value]
         Publish-SACREDAzureKeyVaultCertificate -KeyVaultName $KeyVaultName -CertificateName $certificateName -CertificateString $certificateString
     }
 }
