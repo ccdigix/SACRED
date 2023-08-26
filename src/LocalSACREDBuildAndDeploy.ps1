@@ -83,21 +83,21 @@ Publish-Module -Name .\SACRED.Util\SACRED.Util\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Util\SACRED.Util.Azure\ -Repository SACREDTempRepo
 
 Write-Host 'Installing SACRED modules from temporary NuGet repo.'
-Install-Module SACRED.Job -Scope CurrentUser -Force
-Install-Module SACRED.Log -Scope CurrentUser -Force
-Install-Module SACRED.Log.Local -Scope CurrentUser -Force
-Install-Module SACRED.Rotate.Azure.CosmosDB -Scope CurrentUser -Force
-Install-Module SACRED.Store -Scope CurrentUser -Force
-Install-Module SACRED.Store.Local -Scope CurrentUser -Force
-Install-Module SACRED.Update.Azure.KeyVault -Scope CurrentUser -Force
-Install-Module SACRED.Util -Scope CurrentUser -Force
-Install-Module SACRED.Util.Azure -Scope CurrentUser -Force
+Install-Module SACRED.Job -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Log -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Log.Local -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Rotate.Azure.CosmosDB -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Store -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Store.Local -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Update.Azure.KeyVault -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Util -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Util.Azure -Scope CurrentUser -Repository SACREDTempRepo -Force
 
 Write-Host 'Publishing top level SACRED module to local NuGet repo.'
 Publish-Module -Name .\SACRED\ -Repository SACREDTempRepo
 
 Write-Host 'Installing top level SACRED module from local NuGet repo.'
-Install-Module SACRED -Scope CurrentUser -Force
+Install-Module SACRED -Scope CurrentUser -Repository SACREDTempRepo -Force
 
 Write-Host 'Removing temporary NuGet repo.'
 Unregister-PSRepository -Name 'SACREDTempRepo'
