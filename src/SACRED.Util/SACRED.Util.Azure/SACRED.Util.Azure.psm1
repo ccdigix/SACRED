@@ -159,3 +159,10 @@ Function Get-SACREDAzureContextForResource (
     $global:SACREDLogger.Error($errorMessage)
 	throw [System.Exception] $errorMessage
 }
+
+Function Connect-SACREDToMicrosoftGraph (
+)
+{
+    $global:SACREDLogger.Info("Connecting to Microsoft Graph using existing Az connection.")
+    Connect-MgGraph -AccessToken (Get-AzAccessToken -ResourceTypeName MSGraph).Token | Out-Null
+}

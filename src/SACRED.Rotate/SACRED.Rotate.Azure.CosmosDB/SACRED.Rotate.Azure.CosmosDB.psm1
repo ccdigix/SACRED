@@ -87,11 +87,11 @@ Function Invoke-SACREDCosmosDBKeyRotation (
     }
     $global:SACREDLogger.Info("Key to be regenerated and used is the $newAccountKeyType version.")
 
-    $newCredentials = Invoke-SACREDCosmosDBKeyRegeneration -accountName $AccountName -accountResourceGroupName $AccountResourceGroupName -accountKeyType $newAccountKeyType
+    $credentialInfo = Invoke-SACREDCosmosDBKeyRegeneration -accountName $AccountName -accountResourceGroupName $AccountResourceGroupName -accountKeyType $newAccountKeyType
     $credentialVersionDetails.credentialVersion = $newAccountKeyType
     $global:SACREDStore.SetSACREDRotationJobCredentialVersionDetails($RotationJobName, $credentialVersionDetails)
 
-    return $newCredentials
+    return $credentialInfo
 }
 
 
@@ -135,8 +135,8 @@ Function Invoke-SACREDCosmosDBKeyRegeneration (
     $accountKeyConnectionStrings = Get-AzCosmosDBAccountKey -ResourceGroupName $AccountResourceGroupName -Name $AccountName -Type 'ConnectionStrings' -DefaultProfile $resourceContext
     $newAccountKeyConnectionString = ($accountKeyConnectionStrings.GetEnumerator() | Where-Object { $_.Value -like "*$newAccountKey*" }).Value
 
-    $newCredentials = @{'CosmosDBAccountKey'=$newAccountKey; 'CosmosDBConnectionString'=$newAccountKeyConnectionString}
-    return $newCredentials
+    $credentialInfo = @{'CosmosDBAccountKey'=$newAccountKey; 'CosmosDBConnectionString'=$newAccountKeyConnectionString}
+    return $credentialInfo
 }
 
 Function Build-SACREDCosmosDBRotationJobName (
