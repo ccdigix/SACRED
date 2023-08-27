@@ -70,6 +70,10 @@ Function Register-SACREDRotationJobDefinition (
             }
             if($RotationJobName -eq '') { $RotationJobName = Build-SACREDCosmosDBRotationJobName -RotationJobDefinition $rotationJobDefinition } 
         }
+        elseif($rotationJobDefinition.entraServicePrincipal)
+        {
+            $global:SACREDLogger.Info("Rotation job is for an Entra Service Principal secret.")
+        }
         else 
         {
             throw "No supported credential type found in definition."
@@ -200,10 +204,27 @@ Function Invoke-SACREDRotationJob (
             throw $errorMessage
         }
 
+        #Rotate
         if($rotationJobDefinition.cosmosDBAccount)
         {
             $global:SACREDLogger.Info("Rotation job $RotationJobName is for an Azure Cosmos DB account key.")
-            $newCredentials = Invoke-SACREDCosmosDBKeyRotation -AccountName $rotationJobDefinition.cosmosDBAccount.accountName -AccountResourceGroupName $rotationJobDefinition.cosmosDBAccount.accountResourceGroupName -RotationJobName $RotationJobName
+            $credentialInfo = Invoke-SACREDCosmosDBKeyRotation -AccountName $rotationJobDefinition.cosmosDBAccount.accountName -AccountResourceGroupName $rotationJobDefinition.cosmosDBAccount.accountResourceGroupName -RotationJobName $RotationJobName
+        }
+        elseif($rotationJobDefinition.entraServicePrincipal)
+        {
+            $global:SACREDLogger.Info("Rotation job $RotationJobName is for an Entra Service Principal secret.")
+            $servicePrincipalDisplayName = $rotationJobDefinition.entraServicePrincipal.displayName
+            $secretValidityInDays = $rotationJobDefinition.entraServicePrincipal.secretValidityInDays
+            $secretValidityInHours = $rotationJobDefinition.entraServicePrincipal.secretValidityInHours
+
+            if($secretValidityInHours)
+            {
+                $credentialInfo = Invoke-SACREDEntraServicePrincipalSecretRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName -SecretValidityInHours $secretValidityInHours
+            }
+            else
+            {
+                $credentialInfo = Invoke-SACREDEntraServicePrincipalSecretRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName -SecretValidityInDays $secretValidityInDays
+            }
         }
         else 
         {
@@ -212,6 +233,7 @@ Function Invoke-SACREDRotationJob (
             throw $errorMessage
         }
 
+        #Update
         if($rotationJobDefinition.update.keyVaults)
         {
             foreach($keyVault in $rotationJobDefinition.update.keyVaults)
@@ -223,13 +245,30 @@ Function Invoke-SACREDRotationJob (
 
                 if($secretMappings)
                 {
-                    Publish-SACREDAzureKeyVaultSecrets -KeyVaultName $keyVaultName -SecretMappings $secretMappings -SecretValues $newCredentials
+                    Publish-SACREDAzureKeyVaultSecrets -KeyVaultName $keyVaultName -SecretMappings $secretMappings -SecretValues $credentialInfo
                 }
 
                 if($certificateMappings)
                 {
-                    Publish-SACREDAzureKeyVaultCertificates -KeyVaultName $keyVaultName -CertificateMappings $certificateMappings -CertificateValues $newCredentials
+                    Publish-SACREDAzureKeyVaultCertificates -KeyVaultName $keyVaultName -CertificateMappings $certificateMappings -CertificateValues $credentialInfo
                 }
+            }
+        }
+
+        #Cleanup
+        if($rotationJobDefinition.entraServicePrincipal)
+        {
+            $global:SACREDLogger.Info("Removing older secrets on the Entra Service Principal.")
+            $servicePrincipalDisplayName = $rotationJobDefinition.entraServicePrincipal.displayName
+            $mostRecentSecretsToRetain = $rotationJobDefinition.entraServicePrincipal.mostRecentSecretsToRetain
+
+            if($mostRecentSecretsToRetain)
+            {
+                Remove-SACREDOldEntraServicePrincipalSecrets -ServicePrincipalDisplayName $servicePrincipalDisplayName -MostRecentSecretsToRetain $mostRecentSecretsToRetain
+            }
+            else
+            {
+                Remove-SACREDOldEntraServicePrincipalSecrets -ServicePrincipalDisplayName $servicePrincipalDisplayName
             }
         }
     }

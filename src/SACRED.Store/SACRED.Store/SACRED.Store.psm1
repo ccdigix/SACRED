@@ -63,6 +63,7 @@ Class SACREDRotationJobDefinition
 {
     [string] $rotationSchedule
     [SACREDCosmosDBAccountDefinition] $cosmosDBAccount
+    [SACREDEntraServicePrincipalDefinition] $entraServicePrincipal
     [SACREDUpdateDefinition] $update
 }
 
@@ -71,6 +72,14 @@ Class SACREDCosmosDBAccountDefinition
     [string] $accountName
     [string] $accountResourceGroupName
     [string] $keyType
+}
+
+Class SACREDEntraServicePrincipalDefinition
+{
+    [string] $displayName
+    [int] $secretValidityInDays
+    [int] $secretValidityInHours 
+    [int] $mostRecentSecretsToRetain
 }
 
 Class SACREDUpdateDefinition

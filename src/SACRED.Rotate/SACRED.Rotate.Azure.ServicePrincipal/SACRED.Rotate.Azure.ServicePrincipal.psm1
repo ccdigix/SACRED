@@ -24,13 +24,13 @@ using module SACRED.Log
 
 Function Invoke-SACREDEntraServicePrincipalSecretRotation (
     [Parameter(Mandatory=$true)]    
-    [string]$ServicePrincipalDisplayName,
+    [string] $ServicePrincipalDisplayName,
 
     [Parameter(Mandatory=$false)]
-    [int]$SecretValidityInDays = 365,
+    [int] $SecretValidityInDays = 365,
 
     [Parameter(Mandatory=$false)]
-    [int]$SecretValidityInHours = 0
+    [int] $SecretValidityInHours = 0
 )
 {
     Connect-SACREDToMicrosoftGraph
@@ -40,13 +40,13 @@ Function Invoke-SACREDEntraServicePrincipalSecretRotation (
 
 Function Invoke-SACREDEntraServicePrincipalSecretRegeneration (
     [Parameter(Mandatory=$true)]    
-    [string]$ServicePrincipalDisplayName,
+    [string] $ServicePrincipalDisplayName,
 
     [Parameter(Mandatory=$false)]
-    [int]$SecretValidityInDays = 365,
+    [int] $SecretValidityInDays = 365,
 
     [Parameter(Mandatory=$false)]
-    [int]$SecretValidityInHours = 0
+    [int] $SecretValidityInHours = 0
 )
 {
     $global:SACREDLogger.Info("Regenerating the secret for service principal $ServicePrincipalDisplayName.")
@@ -74,10 +74,10 @@ Function Invoke-SACREDEntraServicePrincipalSecretRegeneration (
 
 Function Remove-SACREDOldEntraServicePrincipalSecrets (
     [Parameter(Mandatory=$true)]    
-    [string]$ServicePrincipalDisplayName,
+    [string] $ServicePrincipalDisplayName,
 
     [Parameter(Mandatory=$false)]
-    [int]$MostRecentSecretsToRetain = 2
+    [int] $MostRecentSecretsToRetain = 2
 )
 {
     $global:SACREDLogger.Info("Removing every SACRED generated secret bar the $MostRecentSecretsToRetain most recent ones, for service principal $ServicePrincipalDisplayName.")
