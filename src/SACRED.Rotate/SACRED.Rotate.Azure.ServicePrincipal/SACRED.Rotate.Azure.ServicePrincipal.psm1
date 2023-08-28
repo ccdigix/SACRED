@@ -82,7 +82,7 @@ Function Remove-SACREDOldEntraServicePrincipalSecrets (
 {
     $global:SACREDLogger.Info("Removing every SACRED generated secret bar the $MostRecentSecretsToRetain most recent ones, for service principal $ServicePrincipalDisplayName.")
     $servicePrincipal = Get-MgServicePrincipal -Filter "DisplayName  eq '$ServicePrincipalDisplayName'"
-    $existingSecrets = ($servicePrincipal.PasswordCredentials | Sort-Object EndDateTime -Descending)
+    $existingSecrets = ($servicePrincipal.PasswordCredentials | Sort-Object StartDateTime -Descending)
     if($existingSecrets.Count -gt $MostRecentSecretsToRetain)
     {
         for($i=$MostRecentSecretsToRetain; $i -lt $existingSecrets.Count; $i++)
