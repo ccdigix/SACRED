@@ -73,6 +73,7 @@ Function Register-SACREDRotationJobDefinition (
         elseif($rotationJobDefinition.entraServicePrincipal)
         {
             $global:SACREDLogger.Info("Rotation job is for an Entra Service Principal secret.")
+            if($RotationJobName -eq '') { $RotationJobName = Build-SACREDEntraServicePrincipalRotationJobName -RotationJobDefinition $rotationJobDefinition } 
         }
         else 
         {
@@ -221,9 +222,13 @@ Function Invoke-SACREDRotationJob (
             {
                 $credentialInfo = Invoke-SACREDEntraServicePrincipalSecretRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName -SecretValidityInHours $secretValidityInHours
             }
-            else
+            elseif($secretValidityInDays)
             {
                 $credentialInfo = Invoke-SACREDEntraServicePrincipalSecretRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName -SecretValidityInDays $secretValidityInDays
+            }
+            else
+            {
+                $credentialInfo = Invoke-SACREDEntraServicePrincipalSecretRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName
             }
         }
         else 

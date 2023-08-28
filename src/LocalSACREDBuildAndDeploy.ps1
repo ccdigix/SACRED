@@ -50,6 +50,7 @@ Remove-Module SACRED.Job -ErrorAction SilentlyContinue
 Remove-Module SACRED.Log -ErrorAction SilentlyContinue
 Remove-Module SACRED.Log.Local -ErrorAction SilentlyContinue
 Remove-Module SACRED.Rotate.Azure.CosmosDB -ErrorAction SilentlyContinue
+Remove-Module SACRED.Rotate.Azure.ServicePrincipal -ErrorAction SilentlyContinue
 Remove-Module SACRED.Store -ErrorAction SilentlyContinue
 Remove-Module SACRED.Store.Local -ErrorAction SilentlyContinue
 Remove-Module SACRED.Update.Azure.KeyVault -ErrorAction SilentlyContinue
@@ -63,6 +64,7 @@ Uninstall-Module SACRED.Job -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Log -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Log.Local -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Rotate.Azure.CosmosDB -AllVersions -Force -ErrorAction SilentlyContinue
+Uninstall-Module SACRED.Rotate.Azure.ServicePrincipal -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Store -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Store.Local -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Update.Azure.KeyVault -AllVersions -Force -ErrorAction SilentlyContinue
@@ -76,6 +78,7 @@ Publish-Module -Name .\SACRED.Job\SACRED.Job\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Log\SACRED.Log\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Log\SACRED.Log.Local\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Rotate\SACRED.Rotate.Azure.CosmosDB\ -Repository SACREDTempRepo
+Publish-Module -Name .\SACRED.Rotate\SACRED.Rotate.Azure.ServicePrincipal\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Store\SACRED.Store\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Store\SACRED.Store.Local\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Update\SACRED.Update.Azure.KeyVault\ -Repository SACREDTempRepo
@@ -87,6 +90,7 @@ Install-Module SACRED.Job -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Log -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Log.Local -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Rotate.Azure.CosmosDB -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Rotate.Azure.ServicePrincipal -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Store -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Store.Local -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Update.Azure.KeyVault -Scope CurrentUser -Repository SACREDTempRepo -Force

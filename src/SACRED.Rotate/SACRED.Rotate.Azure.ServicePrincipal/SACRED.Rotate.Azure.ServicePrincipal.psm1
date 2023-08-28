@@ -93,3 +93,30 @@ Function Remove-SACREDOldEntraServicePrincipalSecrets (
         }
     }
 }
+
+Function Build-SACREDEntraServicePrincipalRotationJobName (
+    [Parameter(Mandatory=$true)]
+    [SACREDRotationJobDefinition] $RotationJobDefinition
+)
+{
+    <#
+        .SYNOPSIS
+        Builds the name of a rotation job for an Entra Service Principal secret/certificate.
+
+        .DESCRIPTION
+        Builds the name of a rotation job for an Entra Service Principal secret/certificate.
+
+        .PARAMETER RotationJobDefinition
+        The definition of the rotation job.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
+    $rotationJobName = "EntraServicePrincipal_$($RotationJobDefinition.entraServicePrincipal.displayName)"
+
+    return $rotationJobName
+}
