@@ -202,7 +202,7 @@ Function Remove-SACREDOldEntraServicePrincipalSelfSignedCertificates (
             $customKeyIdentifier = $credentialToDelete.CustomKeyIdentifier
             if($customKeyIdentifier)
             {
-                $certificateThumbprint = $customKeyIdentifier
+                $certificateThumbprint = [System.Text.Encoding]::UTF8.GetString($customKeyIdentifier)
             }
             else
             {
