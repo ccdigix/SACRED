@@ -239,7 +239,14 @@ Function Build-SACREDEntraServicePrincipalRotationJobName (
         None
     #>
 
-    $rotationJobName = "EntraServicePrincipal_$($RotationJobDefinition.entraServicePrincipal.displayName)"
+    if($RotationJobDefinition.entraServicePrincipal.credentialType -eq 'secret')
+    {
+        $rotationJobName = "EntraServicePrincipal_$($RotationJobDefinition.entraServicePrincipal.displayName)_Secret"
+    }
+    elseif($RotationJobDefinition.entraServicePrincipal.credentialType -eq 'selfsignedcertificate')
+    {
+        $rotationJobName = "EntraServicePrincipal_$($RotationJobDefinition.entraServicePrincipal.displayName)_SelfSignedCertificate"
+    }
 
     return $rotationJobName
 }

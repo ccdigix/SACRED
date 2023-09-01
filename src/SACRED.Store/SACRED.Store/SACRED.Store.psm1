@@ -77,9 +77,10 @@ Class SACREDCosmosDBAccountDefinition
 Class SACREDEntraServicePrincipalDefinition
 {
     [string] $displayName
-    [int] $secretValidityInDays
-    [int] $secretValidityInHours 
-    [int] $mostRecentSecretsToRetain
+    [string] $credentialType
+    [int] $credentialValidityInDays
+    [int] $credentialValidityInHours 
+    [int] $mostRecentCredentialsToRetain
 }
 
 Class SACREDUpdateDefinition
