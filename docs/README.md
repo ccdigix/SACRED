@@ -40,7 +40,7 @@ git clone https://github.com/ccdigix/SACRED.git
 
 ### Dependencies
 
-If making use of Azure functionality within SACRED, there is an assumption that the [Az](https://learn.microsoft.com/en-us/powershell/azure/new-azureps-module-az) PowerShell modules are already installed.
+If making use of Azure functionality within SACRED, there is an assumption that the [Az](https://learn.microsoft.com/en-us/powershell/azure/new-azureps-module-az) PowerShell modules are already installed. If interacting with Entra (formerly known as Azure Active Directory) then you will also need the [Microsoft Graph](https://learn.microsoft.com/en-us/powershell/microsoftgraph/get-started?view=graph-powershell-1.0) modules.
 
 ## 🤔 How does it work?
 

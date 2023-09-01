@@ -70,6 +70,18 @@ Function Register-SACREDRotationJobDefinition (
             }
             if($RotationJobName -eq '') { $RotationJobName = Build-SACREDCosmosDBRotationJobName -RotationJobDefinition $rotationJobDefinition } 
         }
+        elseif($rotationJobDefinition.entraServicePrincipal)
+        {
+            if($rotationJobDefinition.entraServicePrincipal.credentialType -eq 'secret')
+            {
+                $global:SACREDLogger.Info("Rotation job is for an Entra Service Principal secret.")
+            }
+            elseif($RotationJobDefinition.entraServicePrincipal.credentialType -eq 'selfsignedcertificate')
+            {
+                $global:SACREDLogger.Info("Rotation job is for an Entra Service Principal self-signed certifcate.")
+            }
+            if($RotationJobName -eq '') { $RotationJobName = Build-SACREDEntraServicePrincipalRotationJobName -RotationJobDefinition $rotationJobDefinition } 
+        }
         else 
         {
             throw "No supported credential type found in definition."
@@ -200,10 +212,51 @@ Function Invoke-SACREDRotationJob (
             throw $errorMessage
         }
 
+        #Rotate
         if($rotationJobDefinition.cosmosDBAccount)
         {
             $global:SACREDLogger.Info("Rotation job $RotationJobName is for an Azure Cosmos DB account key.")
-            $newCredentials = Invoke-SACREDCosmosDBKeyRotation -AccountName $rotationJobDefinition.cosmosDBAccount.accountName -AccountResourceGroupName $rotationJobDefinition.cosmosDBAccount.accountResourceGroupName -RotationJobName $RotationJobName
+            $credentialInfo = Invoke-SACREDCosmosDBKeyRotation -AccountName $rotationJobDefinition.cosmosDBAccount.accountName -AccountResourceGroupName $rotationJobDefinition.cosmosDBAccount.accountResourceGroupName -RotationJobName $RotationJobName
+        }
+        elseif($rotationJobDefinition.entraServicePrincipal)
+        {
+            $servicePrincipalDisplayName = $rotationJobDefinition.entraServicePrincipal.displayName
+            $credentialValidityInDays = $rotationJobDefinition.entraServicePrincipal.credentialValidityInDays
+            $credentialValidityInHours = $rotationJobDefinition.entraServicePrincipal.credentialValidityInHours
+            if($rotationJobDefinition.entraServicePrincipal.credentialType -eq 'secret')
+            {
+                $global:SACREDLogger.Info("Rotation job $RotationJobName is for an Entra Service Principal secret.")
+
+                if($credentialValidityInHours)
+                {
+                    $credentialInfo = Invoke-SACREDEntraServicePrincipalSecretRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName -SecretValidityInHours $credentialValidityInHours
+                }
+                elseif($credentialValidityInDays)
+                {
+                    $credentialInfo = Invoke-SACREDEntraServicePrincipalSecretRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName -SecretValidityInDays $credentialValidityInDays
+                }
+                else
+                {
+                    $credentialInfo = Invoke-SACREDEntraServicePrincipalSecretRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName
+                }
+            }
+            elseif($rotationJobDefinition.entraServicePrincipal.credentialType -eq 'selfsignedcertificate')
+            {
+                $global:SACREDLogger.Info("Rotation job $RotationJobName is for an Entra Service Principal self-signed certificate.")
+
+                if($credentialValidityInHours)
+                {
+                    $credentialInfo = Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName -CertificateValidityInHours $credentialValidityInHours
+                }
+                elseif($credentialValidityInDays)
+                {
+                    $credentialInfo = Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName -CertificateValidityInDays $credentialValidityInDays
+                }
+                else
+                {
+                    $credentialInfo = Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRotation -ServicePrincipalDisplayName $servicePrincipalDisplayName
+                }
+            }
         }
         else 
         {
@@ -212,6 +265,7 @@ Function Invoke-SACREDRotationJob (
             throw $errorMessage
         }
 
+        #Update
         if($rotationJobDefinition.update.keyVaults)
         {
             foreach($keyVault in $rotationJobDefinition.update.keyVaults)
@@ -223,12 +277,46 @@ Function Invoke-SACREDRotationJob (
 
                 if($secretMappings)
                 {
-                    Publish-SACREDAzureKeyVaultSecrets -KeyVaultName $keyVaultName -SecretMappings $secretMappings -SecretValues $newCredentials
+                    Publish-SACREDAzureKeyVaultSecrets -KeyVaultName $keyVaultName -SecretMappings $secretMappings -SecretValues $credentialInfo
                 }
 
                 if($certificateMappings)
                 {
-                    Publish-SACREDAzureKeyVaultCertificates -KeyVaultName $keyVaultName -CertificateMappings $certificateMappings -CertificateValues $newCredentials
+                    Publish-SACREDAzureKeyVaultCertificates -KeyVaultName $keyVaultName -CertificateMappings $certificateMappings -CertificateValues $credentialInfo
+                }
+            }
+        }
+
+        #Cleanup
+        if($rotationJobDefinition.entraServicePrincipal)
+        {
+            $servicePrincipalDisplayName = $rotationJobDefinition.entraServicePrincipal.displayName
+            $mostRecentCredentialsToRetain = $rotationJobDefinition.entraServicePrincipal.mostRecentCredentialsToRetain
+
+            if($rotationJobDefinition.entraServicePrincipal.credentialType -eq 'secret')
+            {
+                $global:SACREDLogger.Info("Removing older secrets on the Entra Service Principal.")
+
+                if($mostRecentCredentialsToRetain)
+                {
+                    Remove-SACREDOldEntraServicePrincipalSecrets -ServicePrincipalDisplayName $servicePrincipalDisplayName -MostRecentSecretsToRetain $mostRecentCredentialsToRetain
+                }
+                else
+                {
+                    Remove-SACREDOldEntraServicePrincipalSecrets -ServicePrincipalDisplayName $servicePrincipalDisplayName
+                }
+            }
+            elseif($rotationJobDefinition.entraServicePrincipal.credentialType -eq 'selfsignedcertificate')
+            {
+                $global:SACREDLogger.Info("Removing older certificates on the Entra Service Principal.")
+
+                if($mostRecentCredentialsToRetain)
+                {
+                    Remove-SACREDOldEntraServicePrincipalSelfSignedCertificates -ServicePrincipalDisplayName $servicePrincipalDisplayName -MostRecentCertificatesToRetain $mostRecentCredentialsToRetain
+                }
+                else
+                {
+                    Remove-SACREDOldEntraServicePrincipalSelfSignedCertificates -ServicePrincipalDisplayName $servicePrincipalDisplayName
                 }
             }
         }

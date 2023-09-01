@@ -118,7 +118,7 @@ Function Publish-SACREDAzureKeyVaultCertificates (
     [string] $KeyVaultName,
     
     [Parameter(Mandatory=$true)]
-    [PSCustomObject] $CertificateMappings,
+    [PSCustomObject[]] $CertificateMappings,
     
     [Parameter(Mandatory=$true)] 
     [PSCustomObject] $CertificateValues
@@ -135,7 +135,7 @@ Function Publish-SACREDAzureKeyVaultCertificates (
         The name of the Azure Key Vault.
 
         .PARAMETER CertificateMappings
-        A PSCustomObject containing the mappings between the types of certificate stored in CertificateValues, and the certificate names they are stored against within Azure Key Vault.
+        A PSCustomObject array containing the mappings between the types of certificate stored in CertificateValues, and the certificate names they are stored against within Azure Key Vault.
 
         .PARAMETER CertificateValues
         A PSCustomObject containing the potential certificate values.
@@ -148,10 +148,24 @@ Function Publish-SACREDAzureKeyVaultCertificates (
     #>
 
     $global:SACREDLogger.Info("Publishing certificates to Azure Key Vault $KeyVaultName.")
-    $CertificateMappings.PSObject.Properties | ForEach-Object {
-        $certificateName = $_.Name
-        $certificateString = $CertificateValues[$_.Value]
-        Publish-SACREDAzureKeyVaultCertificate -KeyVaultName $KeyVaultName -CertificateName $certificateName -CertificateString $certificateString
+    foreach($certificateMapping in $CertificateMappings)
+    {
+        $certificateName = ''
+        $certificateData = ''
+        $certificatePassword = ''
+
+        $certificateMapping.PSObject.Properties | ForEach-Object {
+            if($_.Name -eq 'password')
+            {
+                $certificatePassword = $CertificateValues[$_.Value]
+            }
+            else
+            {
+                $certificateName = $_.Name
+                $certificateData = $CertificateValues[$_.Value]
+            }
+        }
+        Publish-SACREDAzureKeyVaultCertificate -KeyVaultName $KeyVaultName -CertificateName $certificateName -CertificateData $certificateData -CertificatePassword $certificatePassword
     }
 }
 
@@ -163,7 +177,10 @@ Function Publish-SACREDAzureKeyVaultCertificate (
     [string] $CertificateName,
     
     [Parameter(Mandatory=$true)] 
-    [string] $CertificateString
+    [byte[]] $CertificateData,
+
+    [Parameter(Mandatory=$false)]
+    [string] $CertificatePassword = ''
 )
 {
     <#
@@ -179,8 +196,11 @@ Function Publish-SACREDAzureKeyVaultCertificate (
         .PARAMETER CertificateName
         The name of the certificate.
 
-        .PARAMETER CertificateString
-        The value of the certificate, encoded as a base64 string.
+        .PARAMETER CertificateData
+        The value of the certificate, encoded as a byte array.
+
+        .PARAMETER CertificatePassword
+        If needed, the password that protects the certificate.
 
         .INPUTS
         None
@@ -192,7 +212,17 @@ Function Publish-SACREDAzureKeyVaultCertificate (
     $global:SACREDLogger.Info("Publishing certificate $CertificateName to Azure Key Vault $KeyVaultName.")
     $resourceContext = Get-SACREDAzureContextForResource -ResourceName $KeyVaultName -ResourceType "Microsoft.KeyVault/vaults"
     $currentCertificate = Get-AzKeyVaultCertificate -VaultName $KeyVaultName -Name $CertificateName -DefaultProfile $resourceContext
-    $publishedCertificate = Import-AzKeyVaultCertificate -VaultName $KeyVaultName -Name $CertificateName -CertificateString $CertificateString -DefaultProfile $resourceContext
+
+    $certificateString = [System.Convert]::ToBase64String($CertificateData)
+    if($CertificatePassword -eq '')
+    {
+        Import-AzKeyVaultCertificate -VaultName $KeyVaultName -Name $CertificateName -CertificateString $certificateString -DefaultProfile $resourceContext | Out-Null
+    }
+    else
+    {
+        $secureCertificatePassword = ConvertTo-SecureString -String $CertificatePassword -AsPlainText -Force
+        Import-AzKeyVaultCertificate -VaultName $KeyVaultName -Name $CertificateName -CertificateString $certificateString -Password $secureCertificatePassword -DefaultProfile $resourceContext | Out-Null
+    }
 
     if($currentCertificate -ne $null)
     {
