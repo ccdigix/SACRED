@@ -33,6 +33,29 @@ Function Invoke-SACREDEntraServicePrincipalSecretRotation (
     [int] $SecretValidityInHours = 0
 )
 {
+    <#
+        .SYNOPSIS
+        Rotates an Entra Service Principal secret.
+
+        .DESCRIPTION
+        Rotates an Entra Service Principal secret.
+
+        .PARAMETER ServicePrincipalDisplayName
+        The name of the Entra Service Principal.
+
+        .PARAMETER SecretValidityInDays
+        How long the secret should be valid for, in days.
+
+        .PARAMETER SecretValidityInHours
+        How long the secret should be valid for, in hours.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
     Connect-SACREDToMicrosoftGraph
 
     return Invoke-SACREDEntraServicePrincipalSecretRegeneration -ServicePrincipalDisplayName $ServicePrincipalDisplayName -SecretValidityInDays $SecretValidityInDays -SecretValidityInHours $SecretValidityInHours
@@ -49,6 +72,29 @@ Function Invoke-SACREDEntraServicePrincipalSecretRegeneration (
     [int] $SecretValidityInHours = 0
 )
 {
+    <#
+        .SYNOPSIS
+        Regenerates an Entra Service Principal secret.
+
+        .DESCRIPTION
+        Regenerates an Entra Service Principal secret.
+
+        .PARAMETER ServicePrincipalDisplayName
+        The name of the Entra Service Principal.
+
+        .PARAMETER SecretValidityInDays
+        How long the secret should be valid for, in days.
+
+        .PARAMETER SecretValidityInHours
+        How long the secret should be valid for, in hours.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
     $global:SACREDLogger.Info("Regenerating the secret for service principal $ServicePrincipalDisplayName.")
     $servicePrincipal = Get-MgServicePrincipal -Filter "DisplayName  eq '$ServicePrincipalDisplayName'"
     $secretStartDate = Get-Date
@@ -80,6 +126,26 @@ Function Remove-SACREDOldEntraServicePrincipalSecrets (
     [int] $MostRecentSecretsToRetain = 2
 )
 {
+    <#
+        .SYNOPSIS
+        Removes any old Entra Service Principal secrets.
+
+        .DESCRIPTION
+        Removes any old Entra Service Principal secrets.
+
+        .PARAMETER ServicePrincipalDisplayName
+        The name of the Entra Service Principal.
+
+        .PARAMETER MostRecentSecretsToRetain
+        How many of the most recent secrets (measured by start time) to retain. 
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
     $global:SACREDLogger.Info("Removing every SACRED generated secret bar the $MostRecentSecretsToRetain most recent ones, for service principal $ServicePrincipalDisplayName.")
     $servicePrincipal = Get-MgServicePrincipal -Filter "DisplayName  eq '$ServicePrincipalDisplayName'"
     $existingSecrets = ($servicePrincipal.PasswordCredentials | Sort-Object StartDateTime -Descending)
@@ -105,6 +171,29 @@ Function Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRotation (
     [int] $CertificateValidityInHours = 0
 )
 {
+    <#
+        .SYNOPSIS
+        Rotates an Entra Service Principal certificate.
+
+        .DESCRIPTION
+        Rotates an Entra Service Principal certificate. These certificates are self-signed.
+
+        .PARAMETER ServicePrincipalDisplayName
+        The name of the Entra Service Principal.
+
+        .PARAMETER CertificateValidityInDays
+        How long the certificate should be valid for, in days.
+
+        .PARAMETER CertificateValidityInHours
+        How long the certificate should be valid for, in hours.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
     Connect-SACREDToMicrosoftGraph
 
     return Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRegeneration -ServicePrincipalDisplayName $ServicePrincipalDisplayName -CertificateValidityInDays $CertificateValidityInDays -CertificateValidityInHours $CertificateValidityInHours
@@ -121,6 +210,29 @@ Function Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRegeneration (
     [int] $CertificateValidityInHours = 0
 )
 {
+    <#
+        .SYNOPSIS
+        Regenerates an Entra Service Principal certificate.
+
+        .DESCRIPTION
+        Regenerates an Entra Service Principal certificate. These certificates are self-signed.
+
+        .PARAMETER ServicePrincipalDisplayName
+        The name of the Entra Service Principal.
+
+        .PARAMETER CertificateValidityInDays
+        How long the certificate should be valid for, in days.
+
+        .PARAMETER CertificateValidityInHours
+        How long the certificate should be valid for, in hours.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
     $global:SACREDLogger.Info("Regenerating the self-signed certificate for service principal $ServicePrincipalDisplayName.")
     $certificateStartDate = Get-Date
     if($CertificateValidityInHours -gt 0)
@@ -178,6 +290,26 @@ Function Remove-SACREDOldEntraServicePrincipalSelfSignedCertificates (
     [int] $MostRecentCertificatesToRetain = 2
 )
 {
+    <#
+        .SYNOPSIS
+        Removes any old Entra Service Principal certificates.
+
+        .DESCRIPTION
+        Removes any old Entra Service Principal certificates.
+
+        .PARAMETER ServicePrincipalDisplayName
+        The name of the Entra Service Principal.
+
+        .PARAMETER MostRecentCertificatesToRetain
+        How many of the most recent certificates (measured by start time) to retain. 
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
     $global:SACREDLogger.Info("Removing every SACRED generated certificate bar the $MostRecentCertificatesToRetain most recent ones, for service principal $ServicePrincipalDisplayName.")
     $servicePrincipal = Get-MgServicePrincipal -Filter "DisplayName  eq '$ServicePrincipalDisplayName'"
 
