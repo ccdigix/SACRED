@@ -94,6 +94,66 @@ Function Remove-SACREDOldEntraServicePrincipalSecrets (
     }
 }
 
+Function Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRegeneration (
+    [Parameter(Mandatory=$true)]    
+    [string] $ServicePrincipalDisplayName,
+
+    [Parameter(Mandatory=$false)]
+    [int] $CertificateValidityInDays = 365,
+
+    [Parameter(Mandatory=$false)]
+    [int] $CertificateValidityInHours = 0
+)
+{
+    $global:SACREDLogger.Info("Regenerating the self-signed certificate for service principal $ServicePrincipalDisplayName.")
+    $certificateStartDate = Get-Date
+    if($CertificateValidityInHours -gt 0)
+    {
+        $certificateEndDate = $certificateStartDate.AddHours($CertificateValidityInHours)
+    }
+    else
+    {
+        $certificateEndDate = $certificateStartDate.AddDays($CertificateValidityInDays)
+    }
+    $global:SACREDLogger.Info("New certificate will be valid from $certificateStartDate to $certificateEndDate.")
+    $servicePrincipal = Get-MgServicePrincipal -Filter "DisplayName  eq '$ServicePrincipalDisplayName'"
+    $certificate = New-SelfSignedCertificate -Subject "CN=$ServicePrincipalDisplayName" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256 -NotAfter $certificateEndDate
+
+    $publicCertificateData = $certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
+    $certificateThumbprint = $certificate.Thumbprint
+    $certificateEndDateTime = Get-Date $certificate.NotAfter -Format 'o'
+    
+    $global:SACREDLogger.Info("New certificate thumbprint is $certificateThumbprint.")
+    $keyCredential = @{
+        'CustomKeyIdentifier'=[System.Text.Encoding]::UTF8.GetBytes($certificateThumbprint.Substring(0, 32))
+        'EndDateTime'=$certificateEndDateTime
+        'Key'=$publicCertificateData
+        'Type'='AsymmetricX509Cert'
+        'Usage'='Verify'
+        'DisplayName'="CN=$ServicePrincipalDisplayName"
+    }
+    $keyCredentials = New-Object System.Collections.ArrayList
+    $keyCredentials.Add($keyCredential) | Out-Null
+    if($servicePrincipal.KeyCredentials.Count -gt 0)
+    {
+        foreach($keyCred in $servicePrincipal.KeyCredentials)
+        {
+            $keyCredentials.Add($keyCred) | Out-Null
+        }
+    }
+    $global:SACREDLogger.Info("Updating key credentials on service principal.")
+    Update-MgServicePrincipal -ServicePrincipalId $servicePrincipal.Id -KeyCredentials $keyCredentials
+
+    $privateCertificatePassword = New-Guid
+    $securePrivateCertificatePassword = ConvertTo-SecureString -AsPlainText $privateCertificatePassword -Force
+    $privateCertificateData = $certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $securePrivateCertificatePassword)
+
+    Remove-Item $certificate.PSPath
+
+    $credentialInfo = @{'ServicePrincipalPublicCertificate'=$publicCertificateData; 'ServicePrincipalPrivateCertificate'=$privateCertificateData; 'ServicePrincipalPrivateCertificatePassword'=$privateCertificatePassword; 'ServicePrincipalCertificateThumbprint'=$certificateThumbprint; 'ServicePrincipalCertificateValidFrom'=$certificateStartDate; 'ServicePrincipalCertificateValidTo'=$certificateEndDate}
+    return $credentialInfo
+}
+
 Function Build-SACREDEntraServicePrincipalRotationJobName (
     [Parameter(Mandatory=$true)]
     [SACREDRotationJobDefinition] $RotationJobDefinition
