@@ -14,3 +14,4 @@
 SACRED can rotate the following credential types:
 
 - [Azure Cosmos DB](AzureCosmosDB.md)
+- [Entra (Azure Active Directory) Service Principal](EntraServicePrincipal.md)

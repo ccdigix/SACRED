@@ -48,11 +48,13 @@ The following JSON job definition snippet updates one or more certificates withi
         "keyVaults": [
             {
                 "keyVaultName": "NAME OF THE KEY VAULT",
-                "certificateMappings":  {
-                    "NAME OF THE KEY VAULT CERTIFICATE TO STORE IT IN": "KEY NAME OF A CERTIFICATE WITHIN THE ROTATION OUTPUT THAT WE WANT TO STORE",
-                    "NAME OF ANOTHER KEY VAULT CERTIFICATE TO STORE IT IN": "ANOTHER KEY NAME OF A CERTIFICATE WITHIN THE ROTATION OUTPUT THAT WE WANT TO STORE",
+                "certificateMappings":  [
+                    {
+                        "NAME OF THE KEY VAULT CERTIFICATE TO STORE IN": "KEY NAME OF THE CERTIFICATE DATA WITHIN THE ROTATION OUTPUT THAT WE WANT TO STORE",
+                        "password": "OPTIONAL KEY NAME OF THE CERTIFICATE PASSWORD WITHIN THE ROTATION OUTPUT"
+                    },
                     ...
-                }
+                ]
             }
         ]
     }
