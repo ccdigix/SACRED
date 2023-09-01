@@ -92,5 +92,5 @@ Class SACREDKeyVaultDefinition
 {
     [string] $keyVaultName
     [PSCustomObject] $secretMappings
-    [PSCustomObject] $certificateMappings
+    [PSCustomObject[]] $certificateMappings
 }
