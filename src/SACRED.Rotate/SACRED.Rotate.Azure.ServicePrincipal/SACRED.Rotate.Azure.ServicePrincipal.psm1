@@ -94,6 +94,22 @@ Function Remove-SACREDOldEntraServicePrincipalSecrets (
     }
 }
 
+Function Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRotation (
+    [Parameter(Mandatory=$true)]    
+    [string] $ServicePrincipalDisplayName,
+
+    [Parameter(Mandatory=$false)]
+    [int] $CertificateValidityInDays = 365,
+
+    [Parameter(Mandatory=$false)]
+    [int] $CertificateValidityInHours = 0
+)
+{
+    Connect-SACREDToMicrosoftGraph
+
+    return Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRegeneration -ServicePrincipalDisplayName $ServicePrincipalDisplayName -CertificateValidityInDays $CertificateValidityInDays -CertificateValidityInHours $CertificateValidityInHours
+}
+
 Function Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRegeneration (
     [Parameter(Mandatory=$true)]    
     [string] $ServicePrincipalDisplayName,
@@ -152,6 +168,53 @@ Function Invoke-SACREDEntraServicePrincipalSelfSignedCertificateRegeneration (
 
     $credentialInfo = @{'ServicePrincipalPublicCertificate'=$publicCertificateData; 'ServicePrincipalPrivateCertificate'=$privateCertificateData; 'ServicePrincipalPrivateCertificatePassword'=$privateCertificatePassword; 'ServicePrincipalCertificateThumbprint'=$certificateThumbprint; 'ServicePrincipalCertificateValidFrom'=$certificateStartDate; 'ServicePrincipalCertificateValidTo'=$certificateEndDate}
     return $credentialInfo
+}
+
+Function Remove-SACREDOldEntraServicePrincipalSelfSignedCertificates (
+    [Parameter(Mandatory=$true)]    
+    [string] $ServicePrincipalDisplayName,
+
+    [Parameter(Mandatory=$false)]
+    [int] $MostRecentCertificatesToRetain = 2
+)
+{
+    $global:SACREDLogger.Info("Removing every SACRED generated certificate bar the $MostRecentCertificatesToRetain most recent ones, for service principal $ServicePrincipalDisplayName.")
+    $servicePrincipal = Get-MgServicePrincipal -Filter "DisplayName  eq '$ServicePrincipalDisplayName'"
+
+    $existingCredentials = $servicePrincipal.KeyCredentials
+    $certificateList = New-Object System.Collections.ArrayList
+    $keyCredentials = New-Object System.Collections.ArrayList
+    foreach($existingCredential in $existingCredentials)
+    {
+        if($existingCredential.Type -eq "AsymmetricX509Cert") 
+        {
+            $certificateList.Add($existingCredential) | Out-Null
+        }
+        $keyCredentials.Add($existingCredential) | Out-Null
+    }
+
+    $certificateList = ($certificateList | Sort-Object StartDateTime -Descending)
+    if ($certificateList.Count -gt $MostRecentCertificatesToRetain)
+    {
+        for($i=$MostRecentCertificatesToRetain; $i -lt $certificateList.Count; $i++)
+        {
+            $credentialToDelete = $certificateList[$i]
+            $customKeyIdentifier = $credentialToDelete.CustomKeyIdentifier
+            if($customKeyIdentifier)
+            {
+                $certificateThumbprint = $customKeyIdentifier
+            }
+            else
+            {
+                $certificateThumbprint = 'UNKNOWN'
+            }
+
+            $global:SACREDLogger.Info("Deleting certificate $($credentialToDelete.KeyId) with thumbprint prefix $certificateThumbprint from service principal.")
+            $keyCredentials.Remove($credentialToDelete)
+        }
+
+        Update-MgServicePrincipal -ServicePrincipalId $servicePrincipal.Id -KeyCredentials $keyCredentials
+    }
 }
 
 Function Build-SACREDEntraServicePrincipalRotationJobName (
