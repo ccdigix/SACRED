@@ -82,6 +82,11 @@ Function Register-SACREDRotationJobDefinition (
             }
             if($RotationJobName -eq '') { $RotationJobName = Build-SACREDEntraServicePrincipalRotationJobName -RotationJobDefinition $rotationJobDefinition } 
         }
+        elseif($rotationJobDefinition.mock)
+        {
+            $global:SACREDLogger.Info("Rotation job is for a mock credential.")
+            if($RotationJobName -eq '') { $RotationJobName = 'MockCredential' }
+        }
         else 
         {
             throw "No supported credential type found in definition."
@@ -258,6 +263,15 @@ Function Invoke-SACREDRotationJob (
                 }
             }
         }
+        elseif($rotationJobDefinition.mock)
+        {
+            $global:SACREDLogger.Info("Rotation job $RotationJobName is for a mock credential, inputs will therefore be passed straight through as the generated credential info.")
+            $credentialInfo = @{}
+            foreach($property in $rotationJobDefinition.mock.psobject.properties.name)
+            {
+                $credentialInfo[$property] = $rotationJobDefinition.mock.$property
+            }
+        }
         else 
         {
             $errorMessage = 'No supported credential type found in definition.'
@@ -270,7 +284,7 @@ Function Invoke-SACREDRotationJob (
         {
             foreach($keyVault in $rotationJobDefinition.update.keyVaults)
             {
-                $global:SACREDLogger.Info("New credential needs to go to an Azure Key Vault.")
+                $global:SACREDLogger.Info("New credential info needs to go to an Azure Key Vault.")
                 $keyVaultName = $keyVault.keyVaultName
                 $secretMappings = $keyVault.secretMappings
                 $certificateMappings = $keyVault.certificateMappings
@@ -285,6 +299,11 @@ Function Invoke-SACREDRotationJob (
                     Publish-SACREDAzureKeyVaultCertificates -KeyVaultName $keyVaultName -CertificateMappings $certificateMappings -CertificateValues $credentialInfo
                 }
             }
+        }
+        elseif($rotationJobDefinition.update.mock)
+        {
+            $global:SACREDLogger.Info("New credential info needs to go to a mock destination, it will therefore be stored in a global variable within this session.")
+            $global:SACREDMockDestination = $credentialInfo
         }
 
         #Cleanup

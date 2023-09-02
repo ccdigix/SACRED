@@ -14,3 +14,4 @@
 SACRED can update the following destination types with information produced from a credential rotation:
 
 - [Azure Key Vault](AzureKeyVault.md)
+- [Mock](Mock.md)
