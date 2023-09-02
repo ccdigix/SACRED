@@ -64,6 +64,7 @@ Class SACREDRotationJobDefinition
     [string] $rotationSchedule
     [SACREDCosmosDBAccountDefinition] $cosmosDBAccount
     [SACREDEntraServicePrincipalDefinition] $entraServicePrincipal
+    [PSCustomObject] $mock
     [SACREDUpdateDefinition] $update
 }
 
@@ -86,6 +87,7 @@ Class SACREDEntraServicePrincipalDefinition
 Class SACREDUpdateDefinition
 {
     [SACREDKeyVaultDefinition[]] $keyVaults
+    [PSCustomObject] $mock
 }
 
 Class SACREDKeyVaultDefinition

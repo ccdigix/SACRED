@@ -5,7 +5,7 @@
         </a>
     </p>
 
-[![version](https://img.shields.io/powershellgallery/v/SACRED.Rotate.Entra.ServicePrincipal)](https://www.powershellgallery.com/packages/SACRED.Rotate.Entra.ServicePrincipal)
+[![version](https://img.shields.io/powershellgallery/v/SACRED.Rotate.Azure.ServicePrincipal)](https://www.powershellgallery.com/packages/SACRED.Rotate.Azure.ServicePrincipal)
 [![license](https://img.shields.io/github/license/ccdigix/SACRED)](https://opensource.org/license/mit/)
 </div>
 
