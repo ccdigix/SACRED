@@ -29,7 +29,15 @@ param
 Describe 'SACRED.Rotate.Azure.CosmosDB' {
 
     BeforeAll {
-        Initialize-SACREDEnvironment -LocalStoreBasePath $TestDrive -LocalLoggerBasePath $TestDrive -ConnectToAzure
+        if(!$global:EnvironmentInitialized)
+        {
+            Initialize-SACREDEnvironment -LocalStoreBasePath $TestDrive -LocalLoggerBasePath $TestDrive -ConnectToAzure
+            $global:EnvironmentInitialized = $true
+        }
+        else
+        {
+            Initialize-SACREDEnvironment -LocalStoreBasePath $TestDrive -LocalLoggerBasePath $TestDrive
+        }
     }
 
     It 'Rotates an Azure Cosmos DB read-only account key' {
@@ -37,10 +45,10 @@ Describe 'SACRED.Rotate.Azure.CosmosDB' {
         {
             "cosmosDBAccount": {
                 "accountName": "@@COSMOSDB_ACCOUNT_NAME@@",
-                "accountResourceGroupName":  "@@COSMOSDB_ACCOUNT_RESOURCE_GROUP_NAME@@",
+                "accountResourceGroupName": "@@COSMOSDB_ACCOUNT_RESOURCE_GROUP_NAME@@",
                 "keyType": "readonly"
             },
-            "rotationSchedule":  "never",
+            "rotationSchedule": "never",
             "update": {
                 "mock": {}
             }
@@ -99,10 +107,10 @@ Describe 'SACRED.Rotate.Azure.CosmosDB' {
         {
             "cosmosDBAccount": {
                 "accountName": "@@COSMOSDB_ACCOUNT_NAME@@",
-                "accountResourceGroupName":  "@@COSMOSDB_ACCOUNT_RESOURCE_GROUP_NAME@@",
+                "accountResourceGroupName": "@@COSMOSDB_ACCOUNT_RESOURCE_GROUP_NAME@@",
                 "keyType": "readwrite"
             },
-            "rotationSchedule":  "never",
+            "rotationSchedule": "never",
             "update": {
                 "mock": {}
             }

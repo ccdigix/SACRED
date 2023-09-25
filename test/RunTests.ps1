@@ -21,5 +21,6 @@ SOFTWARE.
 #>
 
 Import-Module "./TestUtils.psm1"
-$pesterContainer = New-PesterContainer -Path '.' -Data @{tokenFilePath='tokens.txt'}
+$global:EnvironmentInitialized = $false
+$pesterContainer = New-PesterContainer -Path '.' -Data @{TokenFilePath='tokens.txt'}
 Invoke-Pester -Container $pesterContainer

@@ -114,7 +114,7 @@ Function Invoke-SACREDEntraServicePrincipalSecretRegeneration (
     }
     $secret = Add-MgServicePrincipalPassword -ServicePrincipalId $servicePrincipal.Id -PasswordCredential $secretCredential
 
-    $credentialInfo = @{'ServicePrincipalSecret'=$secret.SecretText; 'ServicePrincipalSecretValidFrom'=$secretStartDate; 'ServicePrincipalSecretValidTo'=$secretEndDate}
+    $credentialInfo = @{'ServicePrincipalSecret'=$secret.SecretText; 'ServicePrincipalSecretValidFrom'=$secretStartDate; 'ServicePrincipalSecretValidTo'=$secretEndDate; 'ServicePrincipalSecretKeyId'=$secret.KeyId}
     return $credentialInfo
 }
 
