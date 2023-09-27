@@ -1,0 +1,6 @@
+@@COSMOSDB_ACCOUNT_NAME@@ = put_cosmos_account_name_here
+@@COSMOSDB_ACCOUNT_RESOURCE_GROUP_NAME@@ = put_cosmos_account_resource_group_name_here
+
+@@SERVICEPRINCIPAL_DISPLAY_NAME@@ = put_service_principal_name_here
+
+@@KEYVAULT_NAME@@ = put_key_vault_name_here
