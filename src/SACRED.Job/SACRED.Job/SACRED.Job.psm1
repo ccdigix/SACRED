@@ -269,7 +269,14 @@ Function Invoke-SACREDRotationJob (
             $credentialInfo = @{}
             foreach($property in $rotationJobDefinition.mock.psobject.properties.name)
             {
-                $credentialInfo[$property] = $rotationJobDefinition.mock.$property
+                if($property.EndsWith('AsBytes'))
+                {
+                    $credentialInfo[$property] = [System.Convert]::FromBase64String($rotationJobDefinition.mock.$property)
+                }
+                else
+                {
+                    $credentialInfo[$property] = $rotationJobDefinition.mock.$property
+                }
             }
         }
         else 

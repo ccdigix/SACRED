@@ -66,6 +66,7 @@ When a rotation job occurs it produces a map containing useful information that 
 | ServicePrincipalSecret | The newly generated Entra Service Principal secret. |
 | ServicePrincipalSecretValidFrom | When the newly generated secret is valid from. |
 | ServicePrincipalSecretValidTo | When the newly generated secret is valid to. |
+| ServicePrincipalSecretKeyId | The internal key ID of the newly generated Entra Service Principal secret. |
 
 #### Self-signed certificates
 
