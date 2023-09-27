@@ -40,7 +40,7 @@ git clone https://github.com/ccdigix/SACRED.git
 
 ### Dependencies
 
-If making use of Azure functionality within SACRED, there is an assumption that the [Az](https://learn.microsoft.com/en-us/powershell/azure/new-azureps-module-az) PowerShell modules are already installed. If interacting with Entra (formerly known as Azure Active Directory) then you will also need the [Microsoft Graph](https://learn.microsoft.com/en-us/powershell/microsoftgraph/get-started?view=graph-powershell-1.0) modules.
+If making use of Azure functionality within SACRED, there is an assumption that the [Az](https://learn.microsoft.com/en-us/powershell/azure/new-azureps-module-az) PowerShell modules are already installed. If interacting with Entra (formerly known as Azure Active Directory) then you will also need the [Microsoft Graph](https://learn.microsoft.com/en-us/powershell/microsoftgraph/get-started?view=graph-powershell-1.0) modules. If you plan on running the tests within SACRED (maybe for development purposes) then you will require the [Pester](https://pester.dev/) framework modules.
 
 ## 🤔 How does it work?
 
@@ -121,7 +121,7 @@ For example the definition JSON to rotate an Azure Cosmos DB account key on a we
 }
 ```
 
-The above example shows a subtle feature of a SACRED rotation job - that a rotation may not just generate a new credential but also additional information that may be of use (such as the Cosmos DB's new connection string). The destinations to be updated then pick out the items that they want to use (such as the Key Vault storing both the 'CosmosDBAccountKey' and 'CosmosDBConnectionString' in secrets). A full list of [credential](credentialTypes/Index.md) and [destination](destinationTypes/Index.md) types are maintained.
+The above example shows a subtle feature of a SACRED rotation job - that a rotation may not just generate a new credential but also additional information that may be of use (such as the Cosmos DB's new connection string). The destinations to be updated then pick out the items that they want to use (such as the Key Vault storing both the 'CosmosDBAccountKey' and 'CosmosDBConnectionString' in secrets). A full list of [credential](credentialTypes/Index.md) and [destination](destinationTypes/Index.md) types are maintained, and examples of what is possible can be found by browsing through the test cases in the code repo (found within the sub-directories under the `test` directory).
 
 To register a rotation job with SACRED a string containing the JSON definition must be sent to the `Register-SACREDRotationJobDefinition` function alongside an optional name for the job:
 

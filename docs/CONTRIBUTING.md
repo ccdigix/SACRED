@@ -63,3 +63,13 @@ When adding a new SACRED logger type please consider the following:
 - Create a class that extends `SACREDLogger` from the `SACRED.Log` module, overriding the `Log` method (for example look at the `SACREDLocalLogger` class in the `SACRED.Log.Local` module).
 - Update the `SACREDLoggerType` enum in the `SACRED.Util` module to offer this new class.
 - Update the `Initialize-SACREDEnvironment` function in the `SACRED.Util` module so users can select this new logger type when setting up their SACRED environment.
+
+## 🧪 Testing
+
+The [Pester](https://pester.dev/) testing framework is used to create tests to exercise the functionality within SACRED. Key points to note are:
+
+- All tests are stored in appropriately named sub-directories within the `test` directory of the source code.
+- These tests interact with real pre-existing resources, therefore they sometimes require guidance on what resources should actually be used. This is achieved by using tokens as placeholders for the resource details within the tests, so before running them please ensure appropriate substitution values have been entered into the `tokens.txt` file.
+- If any tests require authentication to access these resources (for example within Azure) then an interactive prompt will appear to allow for login.
+- Before running the tests ensure the system has the correct version of SACRED installed i.e. if testing an update that has been made to the SACRED source code ensure `src/LocalSACREDBuildAndDeploy.ps1` has been executed first.
+- The full suite of tests are then run by executing the `RunTests.ps1` script.
