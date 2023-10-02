@@ -102,6 +102,5 @@ Class SACREDWindowsCertificateStoreDefinition
 {
     [string] $storeLocation
     [string] $storeName
-    [PSCustomObject] $secretMappings
     [PSCustomObject[]] $certificateMappings
 }
