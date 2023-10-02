@@ -65,8 +65,8 @@ Function Publish-SACREDWindowsCertificateStoreCertificates (
     $global:SACREDLogger.Info("Publishing certificates into the $CertificateStoreLocation\$CertificateStoreName Windows certificate store.")
     foreach($certificateMapping in $CertificateMappings)
     {
-        $certificateData = $certificateMapping.certificateData
-        $certificatePassword = $certificateMapping.password
+        $certificateData = $CertificateValues[$certificateMapping.certificateData]
+        $certificatePassword = $CertificateValues[$certificateMapping.password]
 
         Publish-SACREDWindowsCertificateStoreCertificate -CertificateStoreLocation $CertificateStoreLocation -CertificateStoreName $CertificateStoreName -CertificateData $certificateData -CertificatePassword $certificatePassword
     }

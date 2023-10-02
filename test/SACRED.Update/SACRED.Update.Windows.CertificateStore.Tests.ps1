@@ -26,58 +26,12 @@ param
     [string] $TokenFilePath
 )
 
-Describe 'SACRED.Update.Azure.KeyVault' {
+Describe 'SACRED.Update.Windows.CertificateStore' {
     BeforeAll {
-        if(!$global:EnvironmentInitialized)
-        {
-            Initialize-SACREDEnvironment -LocalStoreBasePath $TestDrive -LocalLoggerBasePath $TestDrive -ConnectToAzure
-            $global:EnvironmentInitialized = $true
-        }
-        else
-        {
-            Initialize-SACREDEnvironment -LocalStoreBasePath $TestDrive -LocalLoggerBasePath $TestDrive
-        }
+        Initialize-SACREDEnvironment -LocalStoreBasePath $TestDrive -LocalLoggerBasePath $TestDrive
     }
 
-    It 'Updates an Azure Key Vault secret' {
-        $rotationJobDefinitionJSON = '
-        {
-            "mock": {
-                "name": "someName",
-                "age": "45"
-            },
-            "rotationSchedule": "never",
-            "update": {
-                "keyVaults": [
-                    {
-                        "keyVaultName": "@@KEYVAULT_NAME@@",
-                        "secretMappings": {
-                            "testSecret1": "name",
-                            "testSecret2": "age"
-                        }
-                    }
-                ]
-            }
-        }
-        '
-
-        $rotationJobDefinitionJSON = Merge-SACREDTokensIntoRotationJobDefinition -RotationJobDefinitionJSON $rotationJobDefinitionJSON -TokenFilePath $TokenFilePath
-
-        Register-SACREDRotationJobDefinition -RotationJobDefinitionJSON $rotationJobDefinitionJSON
-
-        #Rotate the mock secret
-        $rotationJobName = "MockCredential"
-        Invoke-SACREDRotationJob -RotationJobName $rotationJobName
-
-        #Check the Key Vault was updated correctly
-        $rotationJobDefinition = ConvertFrom-Json $rotationJobDefinitionJSON
-        $testSecret1 = Get-AzKeyVaultSecret -VaultName $rotationJobDefinition.update.keyVaults[0].keyVaultName -Name 'testSecret1' -AsPlainText
-        $testSecret1 | Should -Be $rotationJobDefinition.mock.name
-        $testSecret2 = Get-AzKeyVaultSecret -VaultName $rotationJobDefinition.update.keyVaults[0].keyVaultName -Name 'testSecret2' -AsPlainText
-        $testSecret2 | Should -Be $rotationJobDefinition.mock.age
-    }
-
-    It 'Updates an Azure Key Vault certificate' {
+    It 'Updates a Windows certificate store certificate' {
         $rotationJobDefinitionJSON = '
         {
             "mock": {
@@ -87,12 +41,13 @@ Describe 'SACRED.Update.Azure.KeyVault' {
             },
             "rotationSchedule": "never",
             "update": {
-                "keyVaults": [
+                "windowsCertificateStores": [
                     {
-                        "keyVaultName": "@@KEYVAULT_NAME@@",
+                        "storeLocation": "CurrentUser",
+                        "storeName": "My",
                         "certificateMappings": [
                             {
-                                "testCertificate": "certificateStringAsBytes",
+                                "certificateData": "certificateStringAsBytes",
                                 "password": "certificatePassword"
                             }
                         ]
@@ -106,13 +61,25 @@ Describe 'SACRED.Update.Azure.KeyVault' {
 
         Register-SACREDRotationJobDefinition -RotationJobDefinitionJSON $rotationJobDefinitionJSON
 
+        #Clear down existing test certificates in the store
+        Get-ChildItem Cert:\CurrentUser\My | Where-Object {$_.Subject -eq "CN=SelfSignedCert"} | Remove-Item
+
+        #Add two certificates manually
+        for($i = 0; $i -lt 2; $i++)
+        {
+            $certificateStartDate = Get-Date
+            $certificateEndDate = $certificateStartDate.AddHours(1)
+            $certificate = New-SelfSignedCertificate -Subject "CN=SelfSignedCert" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256 -NotAfter $certificateEndDate
+        }
+
         #Rotate the mock certificate
         $rotationJobName = "MockCredential"
         Invoke-SACREDRotationJob -RotationJobName $rotationJobName
 
-        #Check the Key Vault was updated correctly
+        #Check the certificate store was updated correctly
         $rotationJobDefinition = ConvertFrom-Json $rotationJobDefinitionJSON
-        $testCertificate = Get-AzKeyVaultCertificate -VaultName $rotationJobDefinition.update.keyVaults[0].keyVaultName -Name 'testCertificate'
-        $testCertificate.Thumbprint | Should -Be $rotationJobDefinition.mock.certificateThumbprint
+        $certificates = (Get-ChildItem Cert:\CurrentUser\My | Where-Object {$_.Subject -eq "CN=SelfSignedCert"})
+        $certificates.Count | Should -Be 1
+        $certificates[0].Thumbprint | Should -Be $rotationJobDefinition.mock.certificateThumbprint
     }
 }
