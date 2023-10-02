@@ -54,6 +54,7 @@ Remove-Module SACRED.Rotate.Azure.ServicePrincipal -ErrorAction SilentlyContinue
 Remove-Module SACRED.Store -ErrorAction SilentlyContinue
 Remove-Module SACRED.Store.Local -ErrorAction SilentlyContinue
 Remove-Module SACRED.Update.Azure.KeyVault -ErrorAction SilentlyContinue
+Remove-Module SACRED.Update.Windows.CertificateStore -ErrorAction SilentlyContinue
 Remove-Module SACRED.Util -ErrorAction SilentlyContinue
 Remove-Module SACRED.Util.Azure -ErrorAction SilentlyContinue
 
@@ -68,6 +69,7 @@ Uninstall-Module SACRED.Rotate.Azure.ServicePrincipal -AllVersions -Force -Error
 Uninstall-Module SACRED.Store -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Store.Local -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Update.Azure.KeyVault -AllVersions -Force -ErrorAction SilentlyContinue
+Uninstall-Module SACRED.Update.Windows.CertificateStore -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Util -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Util.Azure -AllVersions -Force -ErrorAction SilentlyContinue
 
@@ -82,6 +84,7 @@ Publish-Module -Name .\SACRED.Rotate\SACRED.Rotate.Azure.ServicePrincipal\ -Repo
 Publish-Module -Name .\SACRED.Store\SACRED.Store\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Store\SACRED.Store.Local\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Update\SACRED.Update.Azure.KeyVault\ -Repository SACREDTempRepo
+Publish-Module -Name .\SACRED.Update\SACRED.Update.Windows.CertificateStore\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Util\SACRED.Util\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Util\SACRED.Util.Azure\ -Repository SACREDTempRepo
 
@@ -94,6 +97,7 @@ Install-Module SACRED.Rotate.Azure.ServicePrincipal -Scope CurrentUser -Reposito
 Install-Module SACRED.Store -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Store.Local -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Update.Azure.KeyVault -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Update.Windows.CertificateStore -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Util -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Util.Azure -Scope CurrentUser -Repository SACREDTempRepo -Force
 

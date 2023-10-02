@@ -87,12 +87,21 @@ Class SACREDEntraServicePrincipalDefinition
 Class SACREDUpdateDefinition
 {
     [SACREDKeyVaultDefinition[]] $keyVaults
+    [SACREDWindowsCertificateStoreDefinition[]] $windowsCertificateStores
     [PSCustomObject] $mock
 }
 
 Class SACREDKeyVaultDefinition
 {
     [string] $keyVaultName
+    [PSCustomObject] $secretMappings
+    [PSCustomObject[]] $certificateMappings
+}
+
+Class SACREDWindowsCertificateStoreDefinition
+{
+    [string] $storeLocation
+    [string] $storeName
     [PSCustomObject] $secretMappings
     [PSCustomObject[]] $certificateMappings
 }
