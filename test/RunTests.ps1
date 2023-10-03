@@ -23,4 +23,5 @@ SOFTWARE.
 Import-Module "./TestUtils.psm1"
 $global:EnvironmentInitialized = $false
 $pesterContainer = New-PesterContainer -Path '.' -Data @{TokenFilePath='tokens.txt'}
-Invoke-Pester -Container $pesterContainer
+$results = Invoke-Pester -Container $pesterContainer -PassThru
+$results | ConvertTo-NUnitReport -Format NUnit3 -AsString | Out-File -FilePath 'TestResults.xml'

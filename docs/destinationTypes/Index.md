@@ -15,3 +15,4 @@ SACRED can update the following destination types with information produced from
 
 - [Azure Key Vault](AzureKeyVault.md)
 - [Mock](Mock.md)
+- [Windows Certificate Store](WindowsCertificateStore.md)

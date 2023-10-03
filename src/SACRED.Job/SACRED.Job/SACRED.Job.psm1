@@ -307,6 +307,17 @@ Function Invoke-SACREDRotationJob (
                 }
             }
         }
+        elseif($rotationJobDefinition.update.windowsCertificateStores)
+        {
+            foreach($windowsCertificateStore in $rotationJobDefinition.update.windowsCertificateStores)
+            {
+                $global:SACREDLogger.Info("New credential info needs to go to a Windows certificate store.")
+                $storeLocation = $windowsCertificateStore.storeLocation
+                $storeName = $windowsCertificateStore.storeName
+                $certificateMappings = $windowsCertificateStore.certificateMappings
+                Publish-SACREDWindowsCertificateStoreCertificates -CertificateStoreLocation $storeLocation -CertificateStoreName $storeName -CertificateMappings $certificateMappings -CertificateValues $credentialInfo
+            }
+        }
         elseif($rotationJobDefinition.update.mock)
         {
             $global:SACREDLogger.Info("New credential info needs to go to a mock destination, it will therefore be stored in a global variable within this session.")
