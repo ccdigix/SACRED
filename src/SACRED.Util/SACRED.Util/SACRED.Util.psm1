@@ -20,10 +20,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+using module SACRED.SecretStore
+using module SACRED.SecretStore.EnvironmentVariable
 using module SACRED.Store
 using module SACRED.Store.Local
 using module SACRED.Log
 using module SACRED.Log.Local
+
+Enum SACREDSecretStoreType
+{
+    EnvironmentVariable
+}
 
 Enum SACREDStoreType
 {
@@ -47,6 +54,9 @@ Function Initialize-SACREDEnvironment (
 
     [Parameter(Mandatory=$false)]
     [string] $LocalLoggerBasePath = '',
+
+    [Parameter(Mandatory=$false)]
+    [SACREDSecretStoreType] $SecretStoreType = [SACREDSecretStoreType]::EnvironmentVariable,
 
     [Parameter(Mandatory=$false)]
     [switch] $ConnectToAzure,
@@ -86,6 +96,9 @@ Function Initialize-SACREDEnvironment (
         .PARAMETER LocalLoggerBasePath
         The base path to use for the local logger to store logs. This parameter is only used if LoggerType is Local.
 
+        .PARAMETER SecretStoreType
+        The type of secret store to use. The default is EnvironmentVariable.
+
         .PARAMETER ConnectToAzure
         Indicates whether to connect to Azure. The default is false.
 
@@ -123,6 +136,20 @@ Function Initialize-SACREDEnvironment (
             }
         }
 
+        if($ConnectToAzure)
+        {
+            Connect-SACREDToAzure -AzureTenantId $AzureTenantId -UseAzureManagedIdentity:$UseAzureManagedIdentity -AzureServicePrincipalClientId $AzureServicePrincipalClientId -AzureServicePrincipalClientSecret $AzureServicePrincipalClientSecret -AzureServicePrincipalClientCertificateThumbprint $AzureServicePrincipalClientCertificateThumbprint
+        }
+
+        switch($SecretStoreType)
+        {
+            'EnvironmentVariable'
+            {
+                $global:SACREDLogger.Info("Using a store that retrieves secrets from environment variables.")
+                [SACREDSecretStore] $global:SACREDSecretStore = [SACREDEnvironmentVariableSecretStore]::new()
+            }
+        }
+
         switch($StoreType)
         {
             'Local'
@@ -131,11 +158,6 @@ Function Initialize-SACREDEnvironment (
                 $global:SACREDLogger.Info("Using a local store with the base path $LocalStoreBasePath.")
                 [SACREDStore] $global:SACREDStore = [SACREDLocalStore]::new($LocalStoreBasePath)
             }
-        }
-
-        if($ConnectToAzure)
-        {
-            Connect-SACREDToAzure -AzureTenantId $AzureTenantId -UseAzureManagedIdentity:$UseAzureManagedIdentity -AzureServicePrincipalClientId $AzureServicePrincipalClientId -AzureServicePrincipalClientSecret $AzureServicePrincipalClientSecret -AzureServicePrincipalClientCertificateThumbprint $AzureServicePrincipalClientCertificateThumbprint
         }
     }
     catch

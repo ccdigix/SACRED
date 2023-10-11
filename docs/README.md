@@ -52,6 +52,7 @@ Before using SACRED setup its environment by using the `Initialize-SACREDEnviron
 | ------------- | ------------- |
 | ...use the local file system SACRED store implementation | ...pass in 'Local' to the `-StoreType` parameter, along with the base path of the store to the `-LocalStoreBasePath` parameter (see [here](#store)) |
 | ...use the local file system SACRED logger implementation  | ...pass in 'Local' to the `-LoggerType` parameter, along with the parent directory of the logs to the `-LocalLoggerBasePath` parameter (see [here](#logs)) |
+| ...use the SACRED secret store implementation that searches environment variables | ...pass in 'EnvironmentVariable' to the `-SecretStoreType` parameter (see [here](#secret-store)) |
 | ...connect to Azure with an interactive login | ...pass in the `-ConnectToAzure` switch parameter along with the tenant ID in the `-AzureTenantId` parameter |
 | ...connect to Azure with a managed identity | ...pass in the `-ConnectToAzure` and `-UseAzureManagedIdentity` switch parameters |
 | ...connect to Azure with a service principal and its secret | ...pass in the `-ConnectToAzure` switch parameter along with the tenant ID in the `-AzureTenantId` parameter, as well as the service principal's client ID and secret in the `-AzureServicePrincipalClientId` / `-AzureServicePrincipalClientSecret` parameters respectively |
@@ -156,6 +157,10 @@ SACRED makes use of an internal store to keep track of rotation job definitions,
 ### Logs
 
 SACRED provides full logging of everything it does, including warnings and errors. The type of logger used is controlled by the `-LoggerType` parameter in the `Initialize-SACREDEnvironment` function, and by default the 'Local' logger implementation is utilised. This logs all messages to the console, in addition to a file under the directory specified by the `-LocalLoggerBasePath` parameter.
+
+### Secret Store
+
+Sometimes SACRED will encounter the need to login or authorise to systems that need their credential rotated or that need updating with a new version of a credential. SACRED uses the concept of a 'secret store' to hold sensitive information required for these authorisations, with the type of secret store controlled by the `-SecretStoreType` parameter in the `Initialize-SACREDEnvironment` function. By default the 'EnvironmentVariable' store implementation is used, which searches through the session's environment variables for the value of the specified secret.
 
 ### Schedules
 

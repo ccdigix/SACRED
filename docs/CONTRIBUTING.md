@@ -64,6 +64,16 @@ When adding a new SACRED logger type please consider the following:
 - Update the `SACREDLoggerType` enum in the `SACRED.Util` module to offer this new class.
 - Update the `Initialize-SACREDEnvironment` function in the `SACRED.Util` module so users can select this new logger type when setting up their SACRED environment.
 
+## 🤫 New secret stores
+
+When adding a new SACRED secret store type please consider the following:
+
+- Create a new module directory for the functionality, somewhere under the SACRED.SecretStore directory.
+- Name the module directory (and its contained .psm1 and .psd1 files) appropriately so the functionality it provides is well understood.
+- Create a class that extends `SACREDSecretStore` from the `SACRED.SecretStore` module, overriding all of its methods (for example look at the `SACREDEnvironmentVariableSecretStore` class in the `SACRED.SecretStore.EnvironmentVariable` module).
+- Update the `SACREDSecretStoreType` enum in the `SACRED.Util` module to offer this new class.
+- Update the `Initialize-SACREDEnvironment` function in the `SACRED.Util` module so users can select this new secret store type when setting up their SACRED environment.
+
 ## 🧪 Testing
 
 The [Pester](https://pester.dev/) testing framework is used to create tests to exercise the functionality within SACRED. Key points to note are:
