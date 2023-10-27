@@ -22,14 +22,17 @@ SOFTWARE.
 
 using module SACRED.SecretStore
 using module SACRED.SecretStore.EnvironmentVariable
+using module SACRED.SecretStore.PodeConfigFile
 using module SACRED.Store
 using module SACRED.Store.Local
 using module SACRED.Log
 using module SACRED.Log.Local
+using module SACRED.Log.Pode
 
 Enum SACREDSecretStoreType
 {
     EnvironmentVariable
+    PodeConfigFile
 }
 
 Enum SACREDStoreType
@@ -40,6 +43,7 @@ Enum SACREDStoreType
 Enum SACREDLoggerType
 {
     Local
+    Pode
 }
 
 Function Initialize-SACREDEnvironment (
@@ -134,6 +138,10 @@ Function Initialize-SACREDEnvironment (
                 if($LocalLoggerBasePath -eq '') { throw "The LocalLoggerBasePath parameter must be specified if logger type is Local." }
                 [SACREDLogger] $global:SACREDLogger = [SACREDLocalLogger]::new($LocalLoggerBasePath)
             }
+            'Pode'
+            {
+                [SACREDLogger] $global:SACREDLogger = [SACREDPodeLogger]::new()
+            }
         }
 
         if($ConnectToAzure)
@@ -147,6 +155,11 @@ Function Initialize-SACREDEnvironment (
             {
                 $global:SACREDLogger.Info("Using a store that retrieves secrets from environment variables.")
                 [SACREDSecretStore] $global:SACREDSecretStore = [SACREDEnvironmentVariableSecretStore]::new()
+            }
+            'PodeConfigFile'
+            {
+                $global:SACREDLogger.Info("Using a store that retrieves secrets from the Pode server config file.")
+                [SACREDSecretStore] $global:SACREDSecretStore = [SACREDPodeConfigFileSecretStore]::new()
             }
         }
 
