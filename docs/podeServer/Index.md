@@ -154,3 +154,134 @@ Next, create a server [configuration file](https://badgerati.github.io/Pode/Tuto
     Tcp = @{ }
 }
 ```
+
+### Starting and stopping
+
+To start the SACRED Pode server execute `Start-SACREDPodeServer`, ensuring the `server.psd1` configuration file is present in the directory from where the command is run.
+
+The SACRED Pode server can be terminated by sending a `Ctrl+C` signal to the running process.
+
+The SACRED Pode server can be restarted by sending a `Ctrl+R` signal to the running process.
+
+### Usage
+
+There are a number of RESTful APIs exposed by the server, which ultimately reflect SACRED's operations. Those APIs are:
+
+
+<details>
+<summary><code>POST</code> <code><b>/api/rotationjob</b></code> <code>(registers a rotation job definition)</code></summary>
+
+##### Parameters
+
+> None
+
+##### Responses
+
+> | Http Code     | Content-Type                      | Response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `text/plain;charset=UTF-8`        | `Rotation job definition created successfully`                      |
+> | `500`         | `text/plain;charset=UTF-8`        | `Failed to register the rotation job definition, error message included` |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X POST -H "Content-Type: application/json" --data 'put rotation job definition json here' http://localhost:8080/api/rotationjob
+> ```
+
+</details>
+
+<details>
+<summary><code>POST</code> <code><b>/api/rotationjob/{rotation_job_name}</b></code> <code>(registers a rotation job definition with a specific name)</code></summary>
+
+##### Parameters
+
+> | Name      |  Type     | Data Type               | Description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | `rotation_job_name`      | required  | string  | The name of the rotation job definition to register.  |
+
+##### Responses
+
+> | Http Code     | Content-Type                      | Response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `201`         | `text/plain;charset=UTF-8`        | `Rotation job definition created successfully`                      |
+> | `500`         | `text/plain;charset=UTF-8`        | `Failed to register the rotation job definition, error message included` |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X POST -H "Content-Type: application/json" --data 'put rotation job definition json here' http://localhost:8080/api/rotationjob/randomname
+> ```
+
+</details>
+
+<details>
+<summary><code>DELETE</code> <code><b>/api/rotationjob/{rotation_job_name}</b></code> <code>(deletes a specific rotation job definition)</code></summary>
+
+##### Parameters
+
+> | Name      |  Type     | Data Type               | Description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | `rotation_job_name`      | required  | string  | The name of the rotation job definition to delete.  |
+
+##### Responses
+
+> | Http Code     | Content-Type                      | Response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `204`         | `text/plain;charset=UTF-8`        | `Rotation job definition successfully deleted`                      |
+> | `500`         | `text/plain;charset=UTF-8`        | `Failed to delete the rotation job definition, error message included` |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X DELETE http://localhost:8080/api/rotationjob/randomname
+> ```
+
+</details>
+
+<details>
+<summary><code>POST</code> <code><b>/api/rotationjob/{rotation_job_name}/run</b></code> <code>(executes a rotation job definition with a specific name)</code></summary>
+
+##### Parameters
+
+> | Name      |  Type     | Data Type               | Description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | `rotation_job_name`      | required  | string  | The name of the rotation job definition to execute.  |
+
+##### Responses
+
+> | Http Code     | Content-Type                      | Response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `200`         | `text/plain;charset=UTF-8`        | `Rotation job definition executed successfully`                      |
+> | `500`         | `text/plain;charset=UTF-8`        | `Failed to execute the rotation job definition, error message included` |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X POST http://localhost:8080/api/rotationjob/randomname/run
+> ```
+
+</details>
+
+<details>
+<summary><code>POST</code> <code><b>/api/schedule/{schedule_name}/run</b></code> <code>(executes a rotation job schedule with a specific name)</code></summary>
+
+##### Parameters
+
+> | Name      |  Type     | Data Type               | Description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | `schedule_name`      | required  | string  | The name of the rotation job schedule to execute.  |
+
+##### Responses
+
+> | Http Code     | Content-Type                      | Response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `200`         | `text/plain;charset=UTF-8`        | `Rotation job schedule executed successfully`                      |
+> | `500`         | `text/plain;charset=UTF-8`        | `Failed to execute the rotation job schedule, error message included` |
+
+##### Example cURL
+
+> ```javascript
+>  curl -X POST http://localhost:8080/api/schedule/randomname/run
+> ```
+
+</details>
