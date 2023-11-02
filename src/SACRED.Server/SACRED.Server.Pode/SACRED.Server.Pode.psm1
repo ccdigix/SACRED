@@ -98,73 +98,108 @@ Function Start-SACREDPodeServer (
             Add-PodeEndpoint -Address (Get-PodeConfig).Address -Port (Get-PodeConfig).Port -Protocol (Get-PodeConfig).Protocol
         }
 
-        Add-PodeRoute -Method Post -Path '/api/rotationjob' -ScriptBlock {
-            try
+        New-PodeAccessScheme -Type Role | Add-PodeAccess -Name 'RoleAccess'
+        New-PodeAuthScheme -ApiKey | Add-PodeAuth -Name 'Authenticate' -Sessionless -ScriptBlock {
+            param($key)
+
+            $roles = @()
+
+            Initialize-SACREDPodeServerEnvironment
+            
+            $rotationJobAuthorApiKey1 = $global:SACREDSecretStore.GetSecret((Get-PodeConfig).SACRED.RotationJobAuthorApiKey1SecretName)
+            $rotationJobAuthorApiKey2 = $global:SACREDSecretStore.GetSecret((Get-PodeConfig).SACRED.RotationJobAuthorApiKey2SecretName)
+            if(($rotationJobAuthorApiKey1 -eq $key) -or ($rotationJobAuthorApiKey2 -eq $key))
             {
-                Initialize-SACREDPodeServerEnvironment
-                Register-SACREDRotationJobDefinition -RotationJobDefinitionJSON $WebEvent.Request.Body
-                Write-PodeTextResponse -Value 'Rotation job definition created successfully' -StatusCode 201
+                $roles += 'RotationJobAuthor'
             }
-            catch
+
+            $rotationJobExecutorApiKey1 = $global:SACREDSecretStore.GetSecret((Get-PodeConfig).SACRED.RotationJobExecutorApiKey1SecretName)
+            $rotationJobExecutorApiKey2 = $global:SACREDSecretStore.GetSecret((Get-PodeConfig).SACRED.RotationJobExecutorApiKey2SecretName)
+            if(($rotationJobExecutorApiKey1 -eq $key) -or ($rotationJobExecutorApiKey2 -eq $key))
             {
-                $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                Write-PodeTextResponse -Value "Failed to register the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                $roles += 'RotationJobExecutor'
+            }
+
+            $user = @{
+                User = @{
+                    Username = 'APIKeyUser'
+                    Roles = $roles
+                }
+            }
+            return $user
+        }
+
+        Add-PodeRouteGroup -Path '/api' -Authentication 'Authenticate' -Role 'RotationJobAuthor' -Access 'RoleAccess' -Routes {
+            Add-PodeRoute -Method Post -Path '/rotationjob' -ScriptBlock {
+                try
+                {
+                    Initialize-SACREDPodeServerEnvironment
+                    Register-SACREDRotationJobDefinition -RotationJobDefinitionJSON $WebEvent.Request.Body
+                    Write-PodeTextResponse -Value 'Rotation job definition created successfully' -StatusCode 201
+                }
+                catch
+                {
+                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
+                    Write-PodeTextResponse -Value "Failed to register the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                }
+            }
+
+            Add-PodeRoute -Method Post -Path '/rotationjob/:rotationJobName' -ScriptBlock {
+                try
+                {
+                    Initialize-SACREDPodeServerEnvironment
+                    Register-SACREDRotationJobDefinition -RotationJobDefinitionJSON $WebEvent.Request.Body -RotationJobName $WebEvent.Parameters['rotationJobName']
+                    Write-PodeTextResponse -Value 'Rotation job definition created successfully' -StatusCode 201
+                }
+                catch
+                {
+                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
+                    Write-PodeTextResponse -Value "Failed to register the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                }
+            }
+
+            Add-PodeRoute -Method Delete -Path '/rotationjob/:rotationJobName' -ScriptBlock {
+                try
+                {
+                    Initialize-SACREDPodeServerEnvironment
+                    Unregister-SACREDRotationJobDefinition -RotationJobName $WebEvent.Parameters['rotationJobName']
+                    Write-PodeTextResponse -Value 'Rotation job definition successfully deleted' -StatusCode 204
+                }
+                catch
+                {
+                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
+                    Write-PodeTextResponse -Value "Failed to delete the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                }
             }
         }
 
-        Add-PodeRoute -Method Post -Path '/api/rotationjob/:rotationJobName' -ScriptBlock {
-            try
-            {
-                Initialize-SACREDPodeServerEnvironment
-                Register-SACREDRotationJobDefinition -RotationJobDefinitionJSON $WebEvent.Request.Body -RotationJobName $WebEvent.Parameters['rotationJobName']
-                Write-PodeTextResponse -Value 'Rotation job definition created successfully' -StatusCode 201
+        Add-PodeRouteGroup -Path '/api' -Authentication 'Authenticate' -Role 'RotationJobExecutor' -Access 'RoleAccess' -Routes {
+            Add-PodeRoute -Method Post -Path '/rotationjob/:rotationJobName/run' -ScriptBlock {
+                try
+                {
+                    Initialize-SACREDPodeServerEnvironment
+                    Invoke-SACREDRotationJob -RotationJobName $WebEvent.Parameters['rotationJobName']
+                    Write-PodeTextResponse -Value 'Rotation job definition executed successfully' -StatusCode 200
+                }
+                catch
+                {
+                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
+                    Write-PodeTextResponse -Value "Failed to execute the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                }
             }
-            catch
-            {
-                $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                Write-PodeTextResponse -Value "Failed to register the rotation job definition, error message included: $errorDetails" -StatusCode 500
-            }
-        }
-
-        Add-PodeRoute -Method Delete -Path '/api/rotationjob/:rotationJobName' -ScriptBlock {
-            try
-            {
-                Initialize-SACREDPodeServerEnvironment
-                Unregister-SACREDRotationJobDefinition -RotationJobName $WebEvent.Parameters['rotationJobName']
-                Write-PodeTextResponse -Value 'Rotation job definition successfully deleted' -StatusCode 204
-            }
-            catch
-            {
-                $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                Write-PodeTextResponse -Value "Failed to delete the rotation job definition, error message included: $errorDetails" -StatusCode 500
-            }
-        }
-
-        Add-PodeRoute -Method Post -Path '/api/rotationjob/:rotationJobName/run' -ScriptBlock {
-            try
-            {
-                Initialize-SACREDPodeServerEnvironment
-                Invoke-SACREDRotationJob -RotationJobName $WebEvent.Parameters['rotationJobName']
-                Write-PodeTextResponse -Value 'Rotation job definition executed successfully' -StatusCode 200
-            }
-            catch
-            {
-                $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                Write-PodeTextResponse -Value "Failed to execute the rotation job definition, error message included: $errorDetails" -StatusCode 500
-            }
-        }
-
-        Add-PodeRoute -Method Post -Path '/api/schedule/:scheduleName/run' -ScriptBlock {
-            try
-            {
-                Initialize-SACREDPodeServerEnvironment
-                Invoke-SACREDRotationSchedule -RotationScheduleName $WebEvent.Parameters['scheduleName']
-                Write-PodeTextResponse -Value 'Rotation job schedule executed successfully' -StatusCode 200
-            }
-            catch
-            {
-                $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                Write-PodeTextResponse -Value "Failed to execute the rotation job schedule, error message included: $errorDetails" -StatusCode 500
+    
+            Add-PodeRoute -Method Post -Path '/schedule/:scheduleName/run' -ScriptBlock {
+                try
+                {
+                    Initialize-SACREDPodeServerEnvironment
+                    Invoke-SACREDRotationSchedule -RotationScheduleName $WebEvent.Parameters['scheduleName']
+                    Write-PodeTextResponse -Value 'Rotation job schedule executed successfully' -StatusCode 200
+                }
+                catch
+                {
+                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
+                    Write-PodeTextResponse -Value "Failed to execute the rotation job schedule, error message included: $errorDetails" -StatusCode 500
+                }
             }
         }
 
