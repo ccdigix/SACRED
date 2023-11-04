@@ -40,58 +40,6 @@ Function Initialize-SACREDPodeServerEnvironment (
     Initialize-SACREDEnvironment -StoreType (Get-PodeConfig).SACRED.StoreType -LocalStoreBasePath (Get-PodeConfig).SACRED.LocalStoreBasePath -LoggerType (Get-PodeConfig).SACRED.LoggerType -LocalLoggerBasePath (Get-PodeConfig).SACRED.LocalLoggerBasePath -SecretStoreType (Get-PodeConfig).SACRED.SecretStoreType -ConnectToAzure:((Get-PodeConfig).SACRED.ConnectToAzure) -AzureTenantId (Get-PodeConfig).SACRED.AzureTenantId -UseAzureManagedIdentity:((Get-PodeConfig).SACRED.UseAzureManagedIdentity) -AzureServicePrincipalClientId (Get-PodeConfig).SACRED.AzureServicePrincipalClientId -AzureServicePrincipalClientSecret (Get-PodeConfig).SACRED.AzureServicePrincipalClientSecret -AzureServicePrincipalClientCertificateThumbprint (Get-PodeConfig).SACRED.AzureServicePrincipalClientCertificateThumbprint
 }
 
-Function ConvertTo-Base64ValueBytes (
-    [Parameter(Mandatory=$true)]    
-    [string] $Value
-) 
-{
-    $Value = ($Value -ireplace '-', '+')
-    $Value = ($Value -ireplace '_', '/')
-
-    switch ($Value.Length % 4) 
-    {
-        1 {
-            #$Value = $Value.Substring(0, $Value.Length - 1)
-            $Value += '==='
-        }
-
-        2 {
-            $Value += '=='
-        }
-
-        3 {
-            $Value += '='
-        }
-    }
-
-    try 
-    {
-        $base64Bytes = [System.Convert]::FromBase64String($Value)
-        return $base64Bytes
-    }
-    catch 
-    {
-        throw 'Invalid Base64 encoded value.'
-    }
-}
-
-Function ConvertFrom-Base64ValueString (
-    [Parameter(Mandatory=$true)]    
-    [string] $Value
-)
-{
-    try 
-    {
-        $base64Bytes = ConvertTo-Base64ValueBytes -Value $Value
-        $Value = [System.Text.Encoding]::UTF8.GetString($base64Bytes)
-        return $Value
-    }
-    catch 
-    {
-        throw 'Invalid Base64 encoded value.'
-    }
-}
-
 Function Start-SACREDPodeServer (
     [Parameter(Mandatory=$false)]
     [int] $ServerThreads = 3
@@ -152,7 +100,7 @@ Function Start-SACREDPodeServer (
 
         New-PodeAccessScheme -Type Role | Add-PodeAccess -Name 'RoleAccess'
 
-        if((Get-PodeConfig).SACRED.ApiAuthentication -eq 'ApiKey')
+        if((Get-PodeConfig).SACRED.ApiAuthenticationType -eq 'ApiKey')
         {
             New-PodeAuthScheme -ApiKey | Add-PodeAuth -Name 'Authenticate' -Sessionless -ScriptBlock {
                 param($key)
@@ -184,14 +132,14 @@ Function Start-SACREDPodeServer (
                 return $user
             }
         }
-        elseif((Get-PodeConfig).SACRED.ApiAuthentication -eq 'EntraServicePrincipalJWT')
+        elseif((Get-PodeConfig).SACRED.ApiAuthenticationType -eq 'EntraServicePrincipalJWT')
         {
             New-PodeAuthScheme -Bearer | Add-PodeAuth -Name 'Authenticate' -Sessionless -ScriptBlock {
                 param($token)
     
                 $tokenParts = $token.Split('.')
-                $header = (ConvertFrom-Base64ValueString -Value $tokenParts[0] | ConvertFrom-Json)
-                $body = (ConvertFrom-Base64ValueString -Value $tokenParts[1] | ConvertFrom-Json)
+                $header = (ConvertFrom-SACREDBase64UrlString -Base64UrlString $tokenParts[0] | ConvertFrom-Json)
+                $body = (ConvertFrom-SACREDBase64UrlString -Base64UrlString $tokenParts[1] | ConvertFrom-Json)
     
                 $openIdConfig = Invoke-RestMethod -Method Get -Uri 'https://login.microsoftonline.com/common/.well-known/openid-configuration'
                 $jwksConfig = Invoke-RestMethod -Method Get -Uri $openIdConfig.jwks_uri
@@ -201,38 +149,53 @@ Function Start-SACREDPodeServer (
                 $cryptoServiceProvider = New-Object System.Security.Cryptography.RSACryptoServiceProvider
                 $cryptoServiceProvider.ImportParameters(
                     @{
-                        Modulus = (ConvertTo-Base64ValueBytes -Value $signingKey.n)
-                        Exponent = (ConvertTo-Base64ValueBytes -Value $signingKey.e)
+                        Modulus = (ConvertTo-SACREDBase64ValueBytes -Base64UrlString $signingKey.n)
+                        Exponent = (ConvertTo-SACREDBase64ValueBytes -Base64UrlString $signingKey.e)
                     }
                 )
                 $sha256 = [System.Security.Cryptography.SHA256]::Create()
                 $hash = $sha256.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($tokenParts[0] + '.' + $tokenParts[1]))
                 $rsaDeformatter = New-Object System.Security.Cryptography.RSAPKCS1SignatureDeformatter($cryptoServiceProvider)
                 $rsaDeformatter.SetHashAlgorithm('SHA256')
-                $validSignature = $rsaDeformatter.VerifySignature($hash, (ConvertTo-Base64ValueBytes($tokenParts[2])))
+                $validSignature = $rsaDeformatter.VerifySignature($hash, (ConvertTo-SACREDBase64ValueBytes -Base64UrlString $tokenParts[2]))
     
                 if(!$validSignature)
                 {
-                    return $null
+                    return @{Code = 401; Message = 'Invalid JWT signature.'}
                 }
     
                 $clientId = (Get-PodeConfig).SACRED.ClientId
                 if($body.aud -ne $clientId)
                 {
-                    return $null
+                    return @{Code = 401; Message = "Invalid JWT client ID - $($body.aud)."}
                 }
     
                 $now = [datetime]::UtcNow
                 $unixStart = [datetime]::new(1970, 1, 1, 0, 0, [DateTimeKind]::Utc)
                 if(($now -gt $unixStart.AddSeconds($body.exp)) -or ($now -lt $unixStart.AddSeconds($body.nbf)))
                 {
-                    return $null
+                    return @{Code = 401; Message = "Invalid JWT time period."}
                 }
     
                 $user = @{
                     User = @{
                         Username = $body.appid
                         Roles = $body.roles
+                    }
+                }
+                return $user
+            }
+        }
+        else
+        {
+            $passThroughAuthScheme = New-PodeAuthScheme -Custom -ScriptBlock {
+                return $null
+            }
+            $passThroughAuthScheme | Add-PodeAuth -Name 'Authenticate' -Sessionless -ScriptBlock {
+                $user = @{
+                    User = @{
+                        Username = 'Anonymous'
+                        Roles = @('RotationJobAuthor', 'RotationJobExecutor')
                     }
                 }
                 return $user

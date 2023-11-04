@@ -181,3 +181,89 @@ Function Initialize-SACREDEnvironment (
         throw $_
     }
 }
+
+Function ConvertTo-SACREDBase64ValueBytes (
+    [Parameter(Mandatory=$true)]    
+    [string] $Base64UrlString
+) 
+{
+    <#
+        .SYNOPSIS
+        Converts a Base64Url encoded string into regular Base64 bytes.
+
+        .DESCRIPTION
+        Converts a Base64Url encoded string into regular Base64 bytes.
+
+        .PARAMETER Base64UrlString
+        The Base64Url string to convert.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
+    $Base64UrlString = ($Base64UrlString -ireplace '-', '+')
+    $Base64UrlString = ($Base64UrlString -ireplace '_', '/')
+
+    switch ($Base64UrlString.Length % 4) 
+    {
+        1 {
+            #$Value = $Value.Substring(0, $Value.Length - 1)
+            $Base64UrlString += '==='
+        }
+
+        2 {
+            $Base64UrlString += '=='
+        }
+
+        3 {
+            $Base64UrlString += '='
+        }
+    }
+
+    try 
+    {
+        $base64Bytes = [System.Convert]::FromBase64String($Base64UrlString)
+        return $base64Bytes
+    }
+    catch 
+    {
+        throw 'Invalid Base64 encoded value.'
+    }
+}
+
+Function ConvertFrom-SACREDBase64UrlString (
+    [Parameter(Mandatory=$true)]    
+    [string] $Base64UrlString
+)
+{
+    <#
+        .SYNOPSIS
+        Converts a Base64Url encoded string into a regular Base64 string.
+
+        .DESCRIPTION
+        Converts a Base64Url encoded string into a regular Base64 string.
+
+        .PARAMETER Base64UrlString
+        The Base64Url string to convert.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
+    try 
+    {
+        $base64Bytes = ConvertTo-SACREDBase64ValueBytes -Base64UrlString $Base64UrlString
+        $base64String = [System.Text.Encoding]::UTF8.GetString($base64Bytes)
+        return $base64String
+    }
+    catch 
+    {
+        throw 'Invalid Base64 encoded value.'
+    }
+}
