@@ -83,6 +83,30 @@ Next, create a server [configuration file](https://badgerati.github.io/Pode/Tuto
         #This field specifies the SACRED secret store implementation to use (either PodeConfigFile or EnvironmentVariable). It is required.
         SecretStoreType = 'PodeConfigFile'
 
+        #This field specifies the authentication mechanism to use when validating access to the REST APIs (one of ApiKey, EntraServicePrincipalJWT, or None). It is required.
+        ApiAuthenticationType = 'ApiKey'
+
+        #Uncomment the following section if the ApiKey authentication type will be used to validate access to the REST APIs.
+        <#
+        #This field specifies the name of the secret (within the SACRED secret store) that contains the first version of the API key needed to access APIs that author rotation job definitions.
+        RotationJobAuthorApiKey1SecretName = ''
+
+         #This field specifies the name of the secret (within the SACRED secret store) that contains the second version of the API key needed to access APIs that author rotation job definitions.
+        RotationJobAuthorApiKey2SecretName = ''
+
+         #This field specifies the name of the secret (within the SACRED secret store) that contains the first version of the API key needed to access APIs that execute rotation job definitions.
+        RotationJobExecutorApiKey1SecretName = ''
+
+        #This field specifies the name of the secret (within the SACRED secret store) that contains the second version of the API key needed to access APIs that execute rotation job definitions.
+        RotationJobExecutorApiKey2SecretName = ''
+        #>
+
+        #Uncomment the following section if the EntraServicePrincipalJWT authentication type will be used to validate access to the REST APIs.
+        <#
+        #This field specifies the client ID of the App Registration object that represents this application, within Entra (formerly Azure Active Directory).
+        ClientId = ''
+        #>
+
         #Uncomment the following section if SACRED will need to connect to Azure to carry out rotation functionality, using an interactive prompt to login.
         <#
         #This field specifies whether SACRED will need to connect to Azure to carry out rotation functionality.
