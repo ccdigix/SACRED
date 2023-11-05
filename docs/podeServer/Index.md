@@ -192,11 +192,40 @@ The SACRED Pode server can be restarted by sending a `Ctrl+R` signal to the runn
 
 ### Usage
 
-There are a number of RESTful APIs exposed by the server, which ultimately reflect SACRED's operations. Those APIs are:
+There are a number of RESTful APIs exposed by the server, which ultimately reflect SACRED's operations. The following details what those APIs are, and how to access them.
 
+#### Authentication and authorisation
+
+The APIs make use of Role Based Access Control (RBAC) to control their execution. There are two roles a user can have, which in turn decides which APIs can and cannot be called by them (detailed below); those roles are `RotationJobAuthor` and `RotationJobExecutor`.
+
+The current authentication mechanisms supported by the SACRED Pode server are by API key, or by using an Entra (formerly Azure Active Directory) issued JWT token for a service principal.
+
+> [!NOTE]
+> Authentication and authorisation can be disabled altogether by setting the `SACRED.ApiAuthenticationType` field to `None` within the `server.psd1` configuration file (or omitting the field completely).
+
+##### API Key
+
+To use an API key to authenticate to the SACRED Pode server APIs, perform the following steps:
+
+1. Within the `server.psd1` configuration file set the `SACRED.ApiAuthenticationType` field to `ApiKey`.
+1. Still within the `server.psd1` configuration file, ensure the following fields are populated:
+    - `SACRED.RotationJobAuthorApiKey1SecretName` - This field specifies the name of the secret (within the SACRED secret store) that contains the first version of the API key needed to access APIs that author rotation job definitions.
+    - `SACRED.RotationJobAuthorApiKey2SecretName` - This field specifies the name of the secret (within the SACRED secret store) that contains the second version of the API key needed to access APIs that author rotation job definitions.
+    - `SACRED.RotationJobExecutorApiKey1SecretName` - This field specifies the name of the secret (within the SACRED secret store) that contains the first version of the API key needed to access APIs that execute rotation job definitions.
+    - `SACRED.RotationJobExecutorApiKey2SecretName` - This field specifies the name of the secret (within the SACRED secret store) that contains the second version of the API key needed to access APIs that execute rotation job definitions.
+1. Populate the four actual API key values against their respective secret name within the SACRED secret store implementation being used. The keys can be in whatever format is desired.
+1. When making a call to one of the APIs ensure the `X-API-KEY` HTTP header is populated with a valid API key value, depending on whether the API requires the `RotationJobAuthor` or `RotationJobExecutor` role.
+
+##### Entra Service Principal JWT
+
+#### API reference
 
 <details>
 <summary><code>POST</code> <code><b>/api/rotationjob</b></code> <code>(registers a rotation job definition)</code></summary>
+
+##### RBAC Role
+
+> RotationJobAuthor
 
 ##### Parameters
 
@@ -219,6 +248,10 @@ There are a number of RESTful APIs exposed by the server, which ultimately refle
 
 <details>
 <summary><code>POST</code> <code><b>/api/rotationjob/{rotation_job_name}</b></code> <code>(registers a rotation job definition with a specific name)</code></summary>
+
+##### RBAC Role
+
+> RotationJobAuthor
 
 ##### Parameters
 
@@ -244,6 +277,10 @@ There are a number of RESTful APIs exposed by the server, which ultimately refle
 <details>
 <summary><code>DELETE</code> <code><b>/api/rotationjob/{rotation_job_name}</b></code> <code>(deletes a specific rotation job definition)</code></summary>
 
+##### RBAC Role
+
+> RotationJobAuthor
+
 ##### Parameters
 
 > | Name      |  Type     | Data Type               | Description                                                           |
@@ -268,6 +305,10 @@ There are a number of RESTful APIs exposed by the server, which ultimately refle
 <details>
 <summary><code>POST</code> <code><b>/api/rotationjob/{rotation_job_name}/run</b></code> <code>(executes a rotation job definition with a specific name)</code></summary>
 
+##### RBAC Role
+
+> RotationJobExecutor
+
 ##### Parameters
 
 > | Name      |  Type     | Data Type               | Description                                                           |
@@ -291,6 +332,10 @@ There are a number of RESTful APIs exposed by the server, which ultimately refle
 
 <details>
 <summary><code>POST</code> <code><b>/api/schedule/{schedule_name}/run</b></code> <code>(executes a rotation job schedule with a specific name)</code></summary>
+
+##### RBAC Role
+
+> RotationJobExecutor
 
 ##### Parameters
 
