@@ -59,7 +59,7 @@ Next, create a server [configuration file](https://badgerati.github.io/Pode/Tuto
 
     Server = @{
         Request = @{
-            #This field specifies the request timeout in seconds. Increase this value if rotation jobs are taking longer than 5 minutes to complete.
+            #This field specifies the request timeout in seconds. Increase this value if rotation jobs are taking longer than 5 minutes to complete (maybe on busy schedules).
             Timeout = 300
         }
     }
