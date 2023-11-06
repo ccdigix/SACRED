@@ -218,6 +218,36 @@ To use an API key to authenticate to the SACRED Pode server APIs, perform the fo
 
 ##### Entra Service Principal JWT
 
+To use an Entra service principal's JWT token to authenticate to the SACRED Pode server APIs, perform the following steps:
+
+1. Within the Entra tenant, create a new App Registration that will represent the SACRED Pode server (the name can be whatever is desired):
+
+    ![New App Registration Image](NewAppRegistration.png)
+
+1. Assign the new App Registration an Application ID URI, which should be of the form `api://<APP REGISTRATION'S CLIENT ID>`:
+
+    ![App Registration ID](AppRegistrationID.png)
+
+1. Create two new App Roles within the App Registration (`RotationJobAuthor` and `RotationJobExecutor`) that grant access to applications only:
+
+    ![App Registration Roles Image](AppRegistrationRoles.png)
+
+1. Within the `server.psd1` configuration file set the `SACRED.ApiAuthenticationType` field to `EntraServicePrincipalJWT`.
+1. Still within the `server.psd1` configuration file, ensure the following fields are populated:
+    - `SACRED.ClientId` - This field specifies the client ID of the App Registration just created, within Entra (formerly Azure Active Directory).
+1. For any service principal that wishes to call the APIs, ensure it gets assigned (and granted) at least one of the `RotationJobAuthor` or `RotationJobExecutor` roles on the SACRED Pode server's App Registration:
+
+    ![Service Principal Permissions Image](ServicePrincipalPermissions.png)
+    ![Service Principal Permissions Granted Image](PermissionsGranted.png)
+
+    > [!NOTE]
+    > The above shows how to assign the permissions if the service principal is associated with another Entra App Registration. If this is not the case and the service principal is standalone (perhaps as part of a Managed Identity) then the Azure Portal cannot currently assign the permissions; therefore a scripting language such as Powershell will need to be used instead. More information on how to do this can be found [here](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/how-to-assign-app-role-managed-identity-powershell).
+
+1. Before the service principal calls an API it will need to request Entra to generate it a signed JWT token. There are numerous libraries that exist to help with this; one way of doing this with Powershell would be:
+    - Log in to Azure as the service principal by using the `Connect-AzAccount` cmdlet (either with a [secret](https://learn.microsoft.com/en-us/powershell/module/az.accounts/connect-azaccount?view=azps-10.4.1#example-3-connect-to-azure-using-a-service-principal-account), a [certificate](https://learn.microsoft.com/en-us/powershell/module/az.accounts/connect-azaccount?view=azps-10.4.1#example-7-connect-using-certificates), or a [managed identity](https://learn.microsoft.com/en-us/powershell/module/az.accounts/connect-azaccount?view=azps-10.4.1#example-5-connect-using-a-managed-service-identity)).
+    - Execute the `(Get-AzAccessToken -ResourceUrl 'PUT SACRED PODE SERVER APP REGISTRATION CLIENT ID HERE').Token` command to retrieve the Base64 encoded JWT token.
+1. When making a call to one of the APIs ensure the `Authorization` HTTP header is populated with `Bearer PUT BASE64 ENCODED JWT TOKEN HERE`.
+
 #### API reference
 
 <details>
@@ -235,8 +265,8 @@ To use an API key to authenticate to the SACRED Pode server APIs, perform the fo
 
 > | Http Code     | Content-Type                      | Response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `201`         | `text/plain;charset=UTF-8`        | `Rotation job definition created successfully`                      |
-> | `500`         | `text/plain;charset=UTF-8`        | `Failed to register the rotation job definition, error message included` |
+> | `201`         | `application/json`        | `Rotation job definition created successfully.`                      |
+> | `500`         | `application/json`        | `The error message, in JSON format.` |
 
 ##### Example cURL
 
@@ -263,8 +293,8 @@ To use an API key to authenticate to the SACRED Pode server APIs, perform the fo
 
 > | Http Code     | Content-Type                      | Response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `201`         | `text/plain;charset=UTF-8`        | `Rotation job definition created successfully`                      |
-> | `500`         | `text/plain;charset=UTF-8`        | `Failed to register the rotation job definition, error message included` |
+> | `201`         | `application/json`        | `Rotation job definition created successfully.`                      |
+> | `500`         | `application/json`        | `The error message, in JSON format.` |
 
 ##### Example cURL
 
@@ -291,8 +321,8 @@ To use an API key to authenticate to the SACRED Pode server APIs, perform the fo
 
 > | Http Code     | Content-Type                      | Response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `204`         | `text/plain;charset=UTF-8`        | `Rotation job definition successfully deleted`                      |
-> | `500`         | `text/plain;charset=UTF-8`        | `Failed to delete the rotation job definition, error message included` |
+> | `204`         | `application/json`        | `Rotation job definition successfully deleted.`                      |
+> | `500`         | `application/json`        | `The error message, in JSON format.` |
 
 ##### Example cURL
 
@@ -319,8 +349,8 @@ To use an API key to authenticate to the SACRED Pode server APIs, perform the fo
 
 > | Http Code     | Content-Type                      | Response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | `Rotation job definition executed successfully`                      |
-> | `500`         | `text/plain;charset=UTF-8`        | `Failed to execute the rotation job definition, error message included` |
+> | `200`         | `application/json`        | `Rotation job definition executed successfully.`                      |
+> | `500`         | `application/json`        | `The error message, in JSON format.` |
 
 ##### Example cURL
 
@@ -347,8 +377,8 @@ To use an API key to authenticate to the SACRED Pode server APIs, perform the fo
 
 > | Http Code     | Content-Type                      | Response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | `Rotation job schedule executed successfully`                      |
-> | `500`         | `text/plain;charset=UTF-8`        | `Failed to execute the rotation job schedule, error message included` |
+> | `200`         | `application/json`        | `Rotation job schedule executed successfully.`                      |
+> | `500`         | `application/json`        | `The error message, in JSON format. There may be multiple errors contained within the message.` |
 
 ##### Example cURL
 
