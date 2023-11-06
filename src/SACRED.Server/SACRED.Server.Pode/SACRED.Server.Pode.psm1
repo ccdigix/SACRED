@@ -208,12 +208,16 @@ Function Start-SACREDPodeServer (
                 {
                     Initialize-SACREDPodeServerEnvironment
                     Register-SACREDRotationJobDefinition -RotationJobDefinitionJSON $WebEvent.Request.Body
-                    Write-PodeTextResponse -Value 'Rotation job definition created successfully' -StatusCode 201
+
+                    $response = @{
+                        'Message' = 'Rotation job definition created successfully.'
+                    } | ConvertTo-Json -Depth 5
+                    Write-PodeJsonResponse -Value $response -StatusCode 201
                 }
                 catch
                 {
-                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                    Write-PodeTextResponse -Value "Failed to register the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                    $errorJSON = ($_.Exception | Select-Object -Property Message,StackTrace,ErrorRecord | ConvertTo-Json -Depth 5)
+                    Write-PodeJsonResponse -Value $errorJSON -StatusCode 500
                 }
             }
 
@@ -222,12 +226,15 @@ Function Start-SACREDPodeServer (
                 {
                     Initialize-SACREDPodeServerEnvironment
                     Register-SACREDRotationJobDefinition -RotationJobDefinitionJSON $WebEvent.Request.Body -RotationJobName $WebEvent.Parameters['rotationJobName']
-                    Write-PodeTextResponse -Value 'Rotation job definition created successfully' -StatusCode 201
+                    $response = @{
+                        'Message' = 'Rotation job definition created successfully.'
+                    } | ConvertTo-Json -Depth 5
+                    Write-PodeJsonResponse -Value $response -StatusCode 201
                 }
                 catch
                 {
-                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                    Write-PodeTextResponse -Value "Failed to register the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                    $errorJSON = ($_.Exception | Select-Object -Property Message,StackTrace,ErrorRecord | ConvertTo-Json -Depth 5)
+                    Write-PodeJsonResponse -Value $errorJSON -StatusCode 500
                 }
             }
 
@@ -236,12 +243,15 @@ Function Start-SACREDPodeServer (
                 {
                     Initialize-SACREDPodeServerEnvironment
                     Unregister-SACREDRotationJobDefinition -RotationJobName $WebEvent.Parameters['rotationJobName']
-                    Write-PodeTextResponse -Value 'Rotation job definition successfully deleted' -StatusCode 204
+                    $response = @{
+                        'Message' = 'Rotation job definition successfully deleted.'
+                    } | ConvertTo-Json -Depth 5
+                    Write-PodeJsonResponse -Value $response -StatusCode 204
                 }
                 catch
                 {
-                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                    Write-PodeTextResponse -Value "Failed to delete the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                    $errorJSON = ($_.Exception | Select-Object -Property Message,StackTrace,ErrorRecord | ConvertTo-Json -Depth 5)
+                    Write-PodeJsonResponse -Value $errorJSON -StatusCode 500
                 }
             }
         }
@@ -252,12 +262,15 @@ Function Start-SACREDPodeServer (
                 {
                     Initialize-SACREDPodeServerEnvironment
                     Invoke-SACREDRotationJob -RotationJobName $WebEvent.Parameters['rotationJobName']
-                    Write-PodeTextResponse -Value 'Rotation job definition executed successfully' -StatusCode 200
+                    $response = @{
+                        'Message' = 'Rotation job definition executed successfully.'
+                    } | ConvertTo-Json -Depth 5
+                    Write-PodeJsonResponse -Value $response -StatusCode 200
                 }
                 catch
                 {
-                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                    Write-PodeTextResponse -Value "Failed to execute the rotation job definition, error message included: $errorDetails" -StatusCode 500
+                    $errorJSON = ($_.Exception | Select-Object -Property Message,StackTrace,ErrorRecord | ConvertTo-Json -Depth 5)
+                    Write-PodeJsonResponse -Value $errorJSON -StatusCode 500
                 }
             }
     
@@ -266,12 +279,15 @@ Function Start-SACREDPodeServer (
                 {
                     Initialize-SACREDPodeServerEnvironment
                     Invoke-SACREDRotationSchedule -RotationScheduleName $WebEvent.Parameters['scheduleName']
-                    Write-PodeTextResponse -Value 'Rotation job schedule executed successfully' -StatusCode 200
+                    $response = @{
+                        'Message' = 'Rotation job schedule executed successfully.'
+                    } | ConvertTo-Json -Depth 5
+                    Write-PodeJsonResponse -Value $response -StatusCode 200
                 }
                 catch
                 {
-                    $errorDetails = ($_.Exception | Format-List -Force | Out-String)
-                    Write-PodeTextResponse -Value "Failed to execute the rotation job schedule, error message included: $errorDetails" -StatusCode 500
+                    $errorJSON = $_.Exception.Message
+                    Write-PodeJsonResponse -Value $errorJSON -StatusCode 500
                 }
             }
         }
