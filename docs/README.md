@@ -11,7 +11,7 @@
 
 ## 👋 Hello!
 
-The Securely Automated Credentials product (SACRED) generates and rotates a wide range of different credential types, with the option of updating the applications that use them. 
+The Securely Automated Credentials product (SACRED) generates and rotates a wide range of different credential types, with the option of updating the applications that use them. It comes with a fully functional [web server](podeServer/Index.md) that exposes SACRED functionality over RESTful APIs.
 
 All SACRED assets are open-source and distributed under the [MIT License](https://opensource.org/license/mit/).
 
@@ -40,7 +40,7 @@ git clone https://github.com/ccdigix/SACRED.git
 
 ### Dependencies
 
-If making use of Azure functionality within SACRED, there is an assumption that the [Az](https://learn.microsoft.com/en-us/powershell/azure/new-azureps-module-az) PowerShell modules are already installed. If interacting with Entra (formerly known as Azure Active Directory) then you will also need the [Microsoft Graph](https://learn.microsoft.com/en-us/powershell/microsoftgraph/get-started?view=graph-powershell-1.0) modules. If you plan on running the tests within SACRED (maybe for development purposes) then you will require the [Pester](https://pester.dev/) framework modules.
+If making use of Azure functionality within SACRED, there is an assumption that the [Az](https://learn.microsoft.com/en-us/powershell/azure/new-azureps-module-az) PowerShell modules are already installed. If interacting with Entra (formerly known as Azure Active Directory) then you will also need the [Microsoft Graph](https://learn.microsoft.com/en-us/powershell/microsoftgraph/get-started?view=graph-powershell-1.0) modules. To run the SACRED Pode Server then you need to make sure [Pode](https://badgerati.github.io/Pode/Getting-Started/Installation/) is installed. If you plan on running the tests within SACRED (maybe for development purposes) then you will require the [Pester](https://pester.dev/) framework modules.
 
 ## 🤔 How does it work?
 
@@ -165,11 +165,13 @@ Sometimes SACRED will encounter the need to login or authorise to systems that n
 ### Schedules
 
 > [!IMPORTANT]
-> SACRED does not provide a scheduler to orchestrate rotation job executions.
+> The core SACRED modules do not provide a scheduler to orchestrate rotation job executions, however the [SACRED Pode Server](podeServer/Index.md) does.
 
 Whilst SACRED does not include a scheduler, it instead manages which job definitions are linked to which schedules and provides a means for an external tool to call `Invoke-SACREDRotationSchedule` to execute them. Therefore the name of the schedules can be anything that makes sense to the user.
 
-For example, to use the built-in Windows task scheduler to trigger a 9am 'daily' SACRED schedule (logging into Azure with a managed identity) you could execute:
+The [SACRED Pode Server](podeServer/Index.md) provides a mechanism to implement schedules with a Cron syntax via its `server.psd1` configuration file.
+
+Another example would be to use the built-in Windows task scheduler. To trigger a 9am 'daily' SACRED schedule (logging into Azure with a managed identity) you could execute:
 
 ```powershell
 $initCommand = "Initialize-SACREDEnvironment -StoreType Local -LocalStoreBasePath 'SomeLocalPath' -LoggerType Local -LocalLoggerBasePath 'AnotherLocalPath' -ConnectToAzure -AzureTenantId 'MyAzureTenantID' -UseAzureManagedIdentity"

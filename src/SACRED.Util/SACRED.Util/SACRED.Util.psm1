@@ -22,14 +22,17 @@ SOFTWARE.
 
 using module SACRED.SecretStore
 using module SACRED.SecretStore.EnvironmentVariable
+using module SACRED.SecretStore.PodeConfigFile
 using module SACRED.Store
 using module SACRED.Store.Local
 using module SACRED.Log
 using module SACRED.Log.Local
+using module SACRED.Log.Pode
 
 Enum SACREDSecretStoreType
 {
     EnvironmentVariable
+    PodeConfigFile
 }
 
 Enum SACREDStoreType
@@ -40,6 +43,7 @@ Enum SACREDStoreType
 Enum SACREDLoggerType
 {
     Local
+    Pode
 }
 
 Function Initialize-SACREDEnvironment (
@@ -134,6 +138,10 @@ Function Initialize-SACREDEnvironment (
                 if($LocalLoggerBasePath -eq '') { throw "The LocalLoggerBasePath parameter must be specified if logger type is Local." }
                 [SACREDLogger] $global:SACREDLogger = [SACREDLocalLogger]::new($LocalLoggerBasePath)
             }
+            'Pode'
+            {
+                [SACREDLogger] $global:SACREDLogger = [SACREDPodeLogger]::new()
+            }
         }
 
         if($ConnectToAzure)
@@ -147,6 +155,11 @@ Function Initialize-SACREDEnvironment (
             {
                 $global:SACREDLogger.Info("Using a store that retrieves secrets from environment variables.")
                 [SACREDSecretStore] $global:SACREDSecretStore = [SACREDEnvironmentVariableSecretStore]::new()
+            }
+            'PodeConfigFile'
+            {
+                $global:SACREDLogger.Info("Using a store that retrieves secrets from the Pode server config file.")
+                [SACREDSecretStore] $global:SACREDSecretStore = [SACREDPodeConfigFileSecretStore]::new()
             }
         }
 
@@ -166,5 +179,91 @@ Function Initialize-SACREDEnvironment (
         $errorDetails = (Resolve-AzError -Last | Out-String)
         $global:SACREDLogger.Error($errorDetails)
         throw $_
+    }
+}
+
+Function ConvertTo-SACREDBase64ValueBytes (
+    [Parameter(Mandatory=$true)]    
+    [string] $Base64UrlString
+) 
+{
+    <#
+        .SYNOPSIS
+        Converts a Base64Url encoded string into regular Base64 bytes.
+
+        .DESCRIPTION
+        Converts a Base64Url encoded string into regular Base64 bytes.
+
+        .PARAMETER Base64UrlString
+        The Base64Url string to convert.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
+    $Base64UrlString = ($Base64UrlString -ireplace '-', '+')
+    $Base64UrlString = ($Base64UrlString -ireplace '_', '/')
+
+    switch ($Base64UrlString.Length % 4) 
+    {
+        1 {
+            #$Value = $Value.Substring(0, $Value.Length - 1)
+            $Base64UrlString += '==='
+        }
+
+        2 {
+            $Base64UrlString += '=='
+        }
+
+        3 {
+            $Base64UrlString += '='
+        }
+    }
+
+    try 
+    {
+        $base64Bytes = [System.Convert]::FromBase64String($Base64UrlString)
+        return $base64Bytes
+    }
+    catch 
+    {
+        throw 'Invalid Base64 encoded value.'
+    }
+}
+
+Function ConvertFrom-SACREDBase64UrlString (
+    [Parameter(Mandatory=$true)]    
+    [string] $Base64UrlString
+)
+{
+    <#
+        .SYNOPSIS
+        Converts a Base64Url encoded string into a regular Base64 string.
+
+        .DESCRIPTION
+        Converts a Base64Url encoded string into a regular Base64 string.
+
+        .PARAMETER Base64UrlString
+        The Base64Url string to convert.
+
+        .INPUTS
+        None
+
+        .OUTPUTS
+        None
+    #>
+
+    try 
+    {
+        $base64Bytes = ConvertTo-SACREDBase64ValueBytes -Base64UrlString $Base64UrlString
+        $base64String = [System.Text.Encoding]::UTF8.GetString($base64Bytes)
+        return $base64String
+    }
+    catch 
+    {
+        throw 'Invalid Base64 encoded value.'
     }
 }

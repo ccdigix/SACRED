@@ -49,10 +49,13 @@ Write-Host 'Unloading any modules already in the session memory.'
 Remove-Module SACRED.Job -ErrorAction SilentlyContinue
 Remove-Module SACRED.Log -ErrorAction SilentlyContinue
 Remove-Module SACRED.Log.Local -ErrorAction SilentlyContinue
+Remove-Module SACRED.Log.Pode -ErrorAction SilentlyContinue
 Remove-Module SACRED.Rotate.Azure.CosmosDB -ErrorAction SilentlyContinue
 Remove-Module SACRED.Rotate.Azure.ServicePrincipal -ErrorAction SilentlyContinue
 Remove-Module SACRED.SecretStore -ErrorAction SilentlyContinue
 Remove-Module SACRED.SecretStore.EnvironmentVariable -ErrorAction SilentlyContinue
+Remove-Module SACRED.SecretStore.PodeConfigFile -ErrorAction SilentlyContinue
+Remove-Module SACRED.Server.Pode -ErrorAction SilentlyContinue
 Remove-Module SACRED.Store -ErrorAction SilentlyContinue
 Remove-Module SACRED.Store.Local -ErrorAction SilentlyContinue
 Remove-Module SACRED.Update.Azure.KeyVault -ErrorAction SilentlyContinue
@@ -66,10 +69,13 @@ Write-Host 'Uninstalling any existing SACRED modules.'
 Uninstall-Module SACRED.Job -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Log -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Log.Local -AllVersions -Force -ErrorAction SilentlyContinue
+Uninstall-Module SACRED.Log.Pode -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Rotate.Azure.CosmosDB -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Rotate.Azure.ServicePrincipal -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.SecretStore -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.SecretStore.EnvironmentVariable -AllVersions -Force -ErrorAction SilentlyContinue
+Uninstall-Module SACRED.SecretStore.PodeConfigFile -AllVersions -Force -ErrorAction SilentlyContinue
+Uninstall-Module SACRED.Server.Pode -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Store -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Store.Local -AllVersions -Force -ErrorAction SilentlyContinue
 Uninstall-Module SACRED.Update.Azure.KeyVault -AllVersions -Force -ErrorAction SilentlyContinue
@@ -83,10 +89,13 @@ Write-Host 'Publishing SACRED modules to temporary NuGet repo.'
 Publish-Module -Name .\SACRED.Job\SACRED.Job\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Log\SACRED.Log\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Log\SACRED.Log.Local\ -Repository SACREDTempRepo
+Publish-Module -Name .\SACRED.Log\SACRED.Log.Pode\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Rotate\SACRED.Rotate.Azure.CosmosDB\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Rotate\SACRED.Rotate.Azure.ServicePrincipal\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.SecretStore\SACRED.SecretStore\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.SecretStore\SACRED.SecretStore.EnvironmentVariable\ -Repository SACREDTempRepo
+Publish-Module -Name .\SACRED.SecretStore\SACRED.SecretStore.PodeConfigFile\ -Repository SACREDTempRepo
+Publish-Module -Name .\SACRED.Server\SACRED.Server.Pode\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Store\SACRED.Store\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Store\SACRED.Store.Local\ -Repository SACREDTempRepo
 Publish-Module -Name .\SACRED.Update\SACRED.Update.Azure.KeyVault\ -Repository SACREDTempRepo
@@ -98,10 +107,13 @@ Write-Host 'Installing SACRED modules from temporary NuGet repo.'
 Install-Module SACRED.Job -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Log -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Log.Local -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Log.Pode -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Rotate.Azure.CosmosDB -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Rotate.Azure.ServicePrincipal -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.SecretStore -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.SecretStore.EnvironmentVariable -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.SecretStore.PodeConfigFile -Scope CurrentUser -Repository SACREDTempRepo -Force
+Install-Module SACRED.Server.Pode -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Store -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Store.Local -Scope CurrentUser -Repository SACREDTempRepo -Force
 Install-Module SACRED.Update.Azure.KeyVault -Scope CurrentUser -Repository SACREDTempRepo -Force

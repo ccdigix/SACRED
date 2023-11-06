@@ -179,9 +179,31 @@ Function Invoke-SACREDRotationSchedule (
     $global:SACREDLogger.Info("Running all rotation jobs on the schedule $RotationScheduleName.")
     $rotationJobNames = $global:SACREDStore.GetSACREDScheduledRotationJobNames($RotationScheduleName)
     $global:SACREDLogger.Info("Found rotation jobs $rotationJobNames.")
+
+    $failures = @()
     foreach($rotationJobName in $rotationJobNames)
     {
-        Invoke-SACREDRotationJob -RotationJobName $rotationJobName
+        try
+        {
+            Invoke-SACREDRotationJob -RotationJobName $rotationJobName
+        }
+        catch
+        {
+            $failure = ($_.Exception | Select-Object -Property Message,StackTrace,ErrorRecord)
+            $failure | Add-Member -NotePropertyName 'RotationJobName' -NotePropertyValue $rotationJobName
+            $failures += $failure
+        }
+    }
+
+    if($failures.Count -gt 0)
+    {
+        $errorObject = @{
+            'SuccessCount' = ($rotationJobNames.Count - $failures.Count)
+            'FailureCount' = $failures.Count
+            'Failures' = $failures
+        }
+        $errorMessage = ($errorObject | ConvertTo-Json -Depth 5)
+        throw $errorMessage
     }
 }
 
