@@ -181,7 +181,7 @@ Next, create a server [configuration file](https://badgerati.github.io/Pode/Tuto
 
 ### Starting and stopping
 
-To start the SACRED Pode server execute `Start-SACREDPodeServer`, ensuring the `server.psd1` configuration file is present in the directory from where the command is run.
+To start the SACRED Pode server execute `Start-SACREDPodeServer`, ensuring the `server.psd1` configuration file is present in the directory from where the command is run. After a few moments a message will display indicating the server is running and listening on the address specified.
 
 > [!NOTE]
 > The number of threads the server uses can be modified via the `ServerThreads` parameter during startup. By default this is set to 3 but to change this to say, 10 threads, then the server should be started by executing `Start-SACREDPodeServer -ServerThreads 10`.
